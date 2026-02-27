@@ -231,6 +231,38 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
     pointer-events: none;
 }
 
+/* Coord row */
+.coord-row {
+    flex-wrap: nowrap;
+}
+
+.coord-row input[type="number"] {
+    width: 80px;
+    flex: 1;
+    -moz-appearance: textfield;
+}
+
+.coord-row input[type="number"]::-webkit-inner-spin-button,
+.coord-row input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.coord-row select {
+    padding: 8px 4px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.8rem;
+    background: #fffafa;
+    color: var(--text);
+    outline: none;
+    flex-shrink: 0;
+}
+
+.coord-row select:focus {
+    border-color: var(--travel-color);
+}
+
 /* ==================== Forms ==================== */
 .add-form {
     background: var(--card-bg);

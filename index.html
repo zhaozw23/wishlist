@@ -85,8 +85,11 @@
             <div class="form-row">
                 <input type="text" id="travelDest" placeholder="想去哪里..." maxlength="200">
             </div>
-            <div class="form-row">
-                <input type="text" id="travelCoord" placeholder="坐标 (点击地图或输入: 纬度, 经度)">
+            <div class="form-row coord-row">
+                <input type="number" id="coordLat" placeholder="纬度" step="any" min="0" max="90">
+                <select id="coordNS"><option value="N">N 北纬</option><option value="S">S 南纬</option></select>
+                <input type="number" id="coordLng" placeholder="经度" step="any" min="0" max="180">
+                <select id="coordEW"><option value="E">E 东经</option><option value="W">W 西经</option></select>
                 <button class="btn btn-outline btn-small" onclick="clearCoord()" title="清除坐标" style="padding:6px 10px">&#10005;</button>
             </div>
             <div class="form-row">
@@ -293,15 +296,30 @@ function initMap() {
     }).addTo(travelMap);
     travelMap.on('click', function(e) {
         const {lat, lng} = e.latlng;
-        document.getElementById('travelCoord').value = lat.toFixed(5) + ', ' + lng.toFixed(5);
+        document.getElementById('coordLat').value = Math.abs(lat).toFixed(5);
+        document.getElementById('coordNS').value = lat >= 0 ? 'N' : 'S';
+        document.getElementById('coordLng').value = Math.abs(lng).toFixed(5);
+        document.getElementById('coordEW').value = lng >= 0 ? 'E' : 'W';
         if (pickMarker) travelMap.removeLayer(pickMarker);
         pickMarker = L.circleMarker([lat, lng], {radius:8, color:'#333', fillColor:'#fff', fillOpacity:1, weight:2}).addTo(travelMap);
     });
 }
 
 function clearCoord() {
-    document.getElementById('travelCoord').value = '';
+    document.getElementById('coordLat').value = '';
+    document.getElementById('coordLng').value = '';
+    document.getElementById('coordNS').value = 'N';
+    document.getElementById('coordEW').value = 'E';
     if (pickMarker) { travelMap.removeLayer(pickMarker); pickMarker = null; }
+}
+
+function getCoordValues() {
+    const latVal = parseFloat(document.getElementById('coordLat').value);
+    const lngVal = parseFloat(document.getElementById('coordLng').value);
+    if (isNaN(latVal) || isNaN(lngVal)) return null;
+    const lat = document.getElementById('coordNS').value === 'S' ? -latVal : latVal;
+    const lng = document.getElementById('coordEW').value === 'W' ? -lngVal : lngVal;
+    return {lat, lng};
 }
 
 function refreshMapMarkers(allTravels) {
@@ -469,14 +487,11 @@ async function addTravel() {
     const dest = document.getElementById('travelDest').value.trim();
     const link = document.getElementById('travelLink').value.trim();
     const note = document.getElementById('travelNote').value.trim();
-    const coord = document.getElementById('travelCoord').value.trim();
     const mid = parseInt(document.getElementById('currentUser').value);
     if (!dest) return;
-    let lat = null, lng = null;
-    if (coord) {
-        const parts = coord.split(',').map(s => parseFloat(s.trim()));
-        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) { lat = parts[0]; lng = parts[1]; }
-    }
+    const coord = getCoordValues();
+    const lat = coord ? coord.lat : null;
+    const lng = coord ? coord.lng : null;
     await sb.from('travels').insert({destination:dest, link:link||null, note:note||null, member_id:mid, lat, lng});
     document.getElementById('travelDest').value=''; document.getElementById('travelLink').value='';
     document.getElementById('travelNote').value=''; clearCoord();
@@ -580,7 +595,7 @@ async function unvisitRest(id) {
 
 // ==================== Enter key ====================
 ['wishTitle','wishLink'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') addWish(); }));
-['travelDest','travelLink','travelNote'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') addTravel(); }));
+['travelDest','coordLat','coordLng','travelLink','travelNote'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') addTravel(); }));
 ['restName','restLink','restNote'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') addRestaurant(); }));
 document.getElementById('memberName').addEventListener('keydown', e => { if(e.key==='Enter') addMember(); });
 
