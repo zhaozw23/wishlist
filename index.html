@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Wishlist</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<header>
+    <h1>Family Wishlist</h1>
+    <div class="user-selector">
+        <span>当前用户:</span>
+        <select id="currentUser"></select>
+    </div>
+</header>
+
+<div class="container">
+    <!-- Add wish -->
+    <div class="add-form">
+        <h2>许个愿</h2>
+        <div class="form-row">
+            <input type="text" id="wishTitle" placeholder="想要什么..." maxlength="200">
+        </div>
+        <div class="form-row">
+            <input type="url" id="wishLink" placeholder="商品链接 (可选)">
+            <button class="btn btn-primary" onclick="addWish()">添加</button>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab active" data-status="active" onclick="switchTab('active')">进行中</div>
+        <div class="tab" data-status="fulfilled" onclick="switchTab('fulfilled')">已实现</div>
+    </div>
+
+    <!-- Filter by member -->
+    <div class="filter-row" id="filterRow"></div>
+
+    <!-- Wish list -->
+    <div id="wishList"></div>
+
+    <!-- Member management -->
+    <div class="member-section">
+        <h2>家庭成员</h2>
+        <div class="member-list" id="memberList"></div>
+        <div class="form-row">
+            <input type="text" id="memberName" placeholder="新成员名字" maxlength="50">
+            <button class="btn btn-outline" onclick="addMember()">添加成员</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://vcbzdslaoumewqhjmojr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjYnpkc2xhb3VtZXdxaGptb2pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxNjI1OTcsImV4cCI6MjA4NzczODU5N30.WhfPPljwTsm_kUEx02hWF_nU6_oqrKJmF4pqjg8Nhfw';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const COLORS = ['#4a90d9','#e74c3c','#27ae60','#f39c12','#9b59b6','#1abc9c','#e67e22','#3498db'];
+let members = [];
+let currentStatus = 'active';
+let filterMember = null;
+
+function memberColor(id) { return COLORS[(id - 1) % COLORS.length]; }
+
+function esc(s) {
+    if (!s) return '';
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+}
+
+async function loadMembers() {
+    const { data } = await sb.from('members').select('*').order('id');
+    members = data || [];
+    const sel = document.getElementById('currentUser');
+    const saved = localStorage.getItem('wishlist_user');
+    sel.innerHTML = members.map(m =>
+        `<option value="${m.id}" ${m.id == saved ? 'selected' : ''}>${m.name}</option>`
+    ).join('');
+    if (!saved && members.length) localStorage.setItem('wishlist_user', members[0].id);
+    sel.onchange = () => localStorage.setItem('wishlist_user', sel.value);
+    renderFilters();
+    renderMemberList();
+}
+
+function renderFilters() {
+    const row = document.getElementById('filterRow');
+    row.innerHTML = `<div class="filter-chip ${filterMember === null ? 'active' : ''}" onclick="setFilter(null)">全部</div>` +
+        members.map(m => `<div class="filter-chip ${filterMember === m.id ? 'active' : ''}" onclick="setFilter(${m.id})">${m.name}</div>`).join('');
+}
+
+function setFilter(id) {
+    filterMember = id;
+    renderFilters();
+    loadWishes();
+}
+
+function renderMemberList() {
+    document.getElementById('memberList').innerHTML = members.map(m =>
+        `<span class="member-tag" style="background:${memberColor(m.id)}22;color:${memberColor(m.id)}">${m.name}</span>`
+    ).join('');
+}
+
+async function loadWishes() {
+    let query = sb.from('wishes').select('*, member:members!member_id(name), fulfiller:members!fulfilled_by(name)');
+    query = query.eq('fulfilled', currentStatus === 'fulfilled');
+    if (filterMember) query = query.eq('member_id', filterMember);
+    query = query.order('created_at', { ascending: false });
+
+    const { data, error } = await query;
+    const list = document.getElementById('wishList');
+
+    if (error) { list.innerHTML = `<div class="empty-state">加载失败: ${esc(error.message)}</div>`; return; }
+    if (!data || !data.length) {
+        list.innerHTML = `<div class="empty-state">${currentStatus === 'active' ? '暂无愿望，快来许愿吧' : '还没有已实现的愿望'}</div>`;
+        return;
+    }
+
+    list.innerHTML = data.map(w => {
+        const color = memberColor(w.member_id);
+        const date = new Date(w.created_at).toLocaleDateString('zh-CN');
+        const memberName = w.member?.name || '';
+        const fulfillerName = w.fulfiller?.name || '';
+        const titleHtml = w.link
+            ? `<a href="${esc(w.link)}" target="_blank" rel="noopener">${esc(w.title)}</a>`
+            : esc(w.title);
+
+        let actionHtml = '';
+        if (currentStatus === 'active') {
+            actionHtml = `<button class="btn btn-success btn-small" onclick="fulfill(${w.id})">实现</button>`;
+        } else {
+            actionHtml = `<button class="btn btn-outline btn-small" onclick="unfulfill(${w.id})">撤回</button>`;
+        }
+
+        let metaHtml = `<span class="member-tag" style="background:${color}22;color:${color}">${esc(memberName)}</span><span>${date}</span>`;
+        if (currentStatus === 'fulfilled' && fulfillerName) {
+            const fdate = w.fulfilled_at ? new Date(w.fulfilled_at).toLocaleDateString('zh-CN') : '';
+            metaHtml += `<span>由 ${esc(fulfillerName)} 实现 ${fdate}</span>`;
+        }
+
+        return `<div class="wish-card ${currentStatus === 'fulfilled' ? 'fulfilled' : ''}" style="border-left-color:${color}">
+            <div class="wish-info">
+                <div class="wish-title">${titleHtml}</div>
+                <div class="wish-meta">${metaHtml}</div>
+            </div>
+            <div class="wish-actions">${actionHtml}</div>
+        </div>`;
+    }).join('');
+}
+
+function switchTab(status) {
+    currentStatus = status;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.status === status));
+    loadWishes();
+}
+
+async function addWish() {
+    const title = document.getElementById('wishTitle').value.trim();
+    const link = document.getElementById('wishLink').value.trim();
+    const memberId = parseInt(document.getElementById('currentUser').value);
+    if (!title) return;
+    const { error } = await sb.from('wishes').insert({ title, link: link || null, member_id: memberId });
+    if (error) { alert('添加失败: ' + error.message); return; }
+    document.getElementById('wishTitle').value = '';
+    document.getElementById('wishLink').value = '';
+    loadWishes();
+}
+
+async function fulfill(id) {
+    const memberId = parseInt(document.getElementById('currentUser').value);
+    const { error } = await sb.from('wishes').update({
+        fulfilled: true, fulfilled_at: new Date().toISOString(), fulfilled_by: memberId
+    }).eq('id', id);
+    if (error) { alert('操作失败: ' + error.message); return; }
+    loadWishes();
+}
+
+async function unfulfill(id) {
+    const { error } = await sb.from('wishes').update({
+        fulfilled: false, fulfilled_at: null, fulfilled_by: null
+    }).eq('id', id);
+    if (error) { alert('操作失败: ' + error.message); return; }
+    loadWishes();
+}
+
+async function addMember() {
+    const input = document.getElementById('memberName');
+    const name = input.value.trim();
+    if (!name) return;
+    const { error } = await sb.from('members').insert({ name });
+    if (error) { alert(error.message.includes('duplicate') ? '该成员已存在' : error.message); return; }
+    input.value = '';
+    await loadMembers();
+    loadWishes();
+}
+
+// Enter key support
+document.getElementById('wishTitle').addEventListener('keydown', e => { if (e.key === 'Enter') addWish(); });
+document.getElementById('wishLink').addEventListener('keydown', e => { if (e.key === 'Enter') addWish(); });
+document.getElementById('memberName').addEventListener('keydown', e => { if (e.key === 'Enter') addMember(); });
+
+// Init
+loadMembers().then(loadWishes);
+</script>
+</body>
+</html>
