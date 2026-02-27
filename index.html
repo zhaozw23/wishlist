@@ -289,15 +289,30 @@ let travelMap = null, mapMarkers = [], pickMarker = null;
 let pendingMapData = null; // store data if map not ready yet
 let mapFirstFit = true; // only auto-fit bounds on first load
 
+function wrapLng(lng) {
+    // Normalize longitude to [-180, 180]
+    while (lng > 180) lng -= 360;
+    while (lng < -180) lng += 360;
+    return lng;
+}
+
 function initMap() {
     if (travelMap) return;
-    travelMap = L.map('travelMap', {zoomControl: true, minZoom: 2}).setView([20, 0], 2);
+    travelMap = L.map('travelMap', {
+        zoomControl: true,
+        minZoom: 2,
+        maxBounds: [[-85, -180], [85, 180]],
+        maxBoundsViscosity: 1.0
+    }).setView([20, 0], 2);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap',
-        maxZoom: 18
+        maxZoom: 18,
+        noWrap: true,
+        bounds: [[-90, -180], [90, 180]]
     }).addTo(travelMap);
     travelMap.on('click', function(e) {
-        const {lat, lng} = e.latlng;
+        const lat = e.latlng.lat;
+        const lng = wrapLng(e.latlng.lng);
         document.getElementById('coordLat').value = Math.abs(lat).toFixed(5);
         document.getElementById('coordNS').value = lat >= 0 ? 'N' : 'S';
         document.getElementById('coordLng').value = Math.abs(lng).toFixed(5);
@@ -324,8 +339,8 @@ function getCoordValues() {
     const latVal = parseFloat(document.getElementById('coordLat').value);
     const lngVal = parseFloat(document.getElementById('coordLng').value);
     if (isNaN(latVal) || isNaN(lngVal)) return null;
-    const lat = document.getElementById('coordNS').value === 'S' ? -latVal : latVal;
-    const lng = document.getElementById('coordEW').value === 'W' ? -lngVal : lngVal;
+    const lat = Math.max(-90, Math.min(90, document.getElementById('coordNS').value === 'S' ? -latVal : latVal));
+    const lng = wrapLng(document.getElementById('coordEW').value === 'W' ? -lngVal : lngVal);
     return {lat, lng};
 }
 
@@ -342,7 +357,8 @@ function refreshMapMarkers(allTravels) {
         if (t.lat == null || t.lng == null) return;
         const done = !!t.fulfilled;
         const color = done ? '#27ae60' : '#5b8def';
-        const marker = L.marker([t.lat, t.lng], {
+        const mlat = t.lat, mlng = wrapLng(t.lng);
+        const marker = L.marker([mlat, mlng], {
             icon: L.divIcon({
                 className: 'map-pin',
                 html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.3)"></div>`,
@@ -352,7 +368,7 @@ function refreshMapMarkers(allTravels) {
         }).addTo(travelMap);
         marker.bindPopup(`<b>${esc(t.destination)}</b><br><span style="color:${color}">${done?'已去过':'想去的'}</span>${t.note?'<br>'+esc(t.note):''}`);
         mapMarkers.push(marker);
-        bounds.push([t.lat, t.lng]);
+        bounds.push([mlat, mlng]);
     });
 
     // Only auto-fit on first load
