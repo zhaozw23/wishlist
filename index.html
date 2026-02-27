@@ -289,11 +289,10 @@ let travelMap = null, mapMarkers = [], pickMarker = null;
 
 function initMap() {
     if (travelMap) return;
-    travelMap = L.map('travelMap', {zoomControl: true, worldCopyJump: true, maxBoundsViscosity: 1.0, maxBounds: [[-90, -180],[90, 180]]}).setView([30, 110], 3);
+    travelMap = L.map('travelMap', {zoomControl: true, minZoom: 2}).setView([30, 110], 3);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap',
-        maxZoom: 18,
-        noWrap: true
+        maxZoom: 18
     }).addTo(travelMap);
     travelMap.on('click', function(e) {
         const {lat, lng} = e.latlng;
