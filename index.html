@@ -133,26 +133,19 @@
         <div id="restaurantList"></div>
     </div>
 
-    <!-- Visit modal -->
-    <div class="modal-overlay" id="visitModal" style="display:none" onclick="if(event.target===this)closeVisitModal()">
+    <!-- Done modal (shared by travel & restaurant) -->
+    <div class="modal-overlay" id="doneModal" style="display:none" onclick="if(event.target===this)closeDoneModal()">
         <div class="modal-box">
-            <h2>&#127860; 记录用餐体验</h2>
-            <input type="hidden" id="visitRestId">
-            <div class="form-row">
-                <label>去的日期</label>
-            </div>
-            <div class="form-row">
-                <input type="date" id="visitDate">
-            </div>
-            <div class="form-row">
-                <label>点评</label>
-            </div>
-            <div class="form-row">
-                <textarea id="visitReview" rows="3" placeholder="味道怎么样？推荐什么菜？"></textarea>
-            </div>
+            <h2 id="doneModalTitle"></h2>
+            <input type="hidden" id="doneModalId">
+            <input type="hidden" id="doneModalType">
+            <div class="form-row"><label>日期</label></div>
+            <div class="form-row"><input type="date" id="doneModalDate"></div>
+            <div class="form-row"><label id="doneModalReviewLabel">总结</label></div>
+            <div class="form-row"><textarea id="doneModalReview" rows="3"></textarea></div>
             <div class="form-row" style="justify-content:flex-end;gap:10px">
-                <button class="btn btn-outline" onclick="closeVisitModal()">取消</button>
-                <button class="btn btn-rest" onclick="submitVisit()">确认</button>
+                <button class="btn btn-outline" onclick="closeDoneModal()">取消</button>
+                <button class="btn btn-primary" id="doneModalBtn" onclick="submitDoneModal()">确认</button>
             </div>
         </div>
     </div>
@@ -455,13 +448,14 @@ async function loadTravels() {
         const note = t.note ? `<div class="card-note">${esc(t.note)}</div>` : '';
         const coordLink = (t.lat!=null && t.lng!=null)
             ? `<span class="coord-link" onclick="flyTo(${t.lat},${t.lng})">&#128205; ${t.lat.toFixed(2)}, ${t.lng.toFixed(2)}</span>` : '';
+        const reviewHtml = (travelStatus==='done' && t.review) ? `<div class="review-box">&#128221; ${esc(t.review)}</div>` : '';
         const act = travelStatus==='pending'
-            ? `<button class="btn btn-travel btn-small" onclick="fulfillTravel(${t.id})">&#9992;&#65039; 去过了</button>`
+            ? `<button class="btn btn-travel btn-small" onclick="openDoneModal(${t.id},'travel')">&#9992;&#65039; 去过了</button>`
             : `<button class="btn btn-outline btn-small" onclick="unfulfillTravel(${t.id})">撤回</button>`;
         let meta = `<span class="member-tag" style="background:${c}18;color:${c}">${esc(t.member?.name)}</span><span>${date}</span>${coordLink}`;
         if (travelStatus==='done' && t.fulfilled_at) meta += `<span>去过 ${new Date(t.fulfilled_at).toLocaleDateString('zh-CN')}</span>`;
         return `<div class="item-card theme-travel ${travelStatus==='done'?'done':''}" style="border-left-color:${c}">
-            <div class="card-info"><div class="card-title">${title}</div>${note}<div class="card-meta">${meta}</div></div>
+            <div class="card-info"><div class="card-title">${title}</div>${note}${reviewHtml}<div class="card-meta">${meta}</div></div>
             <div class="card-actions">${act}</div></div>`;
     }).join('');
 }
@@ -488,8 +482,7 @@ async function addTravel() {
     document.getElementById('travelNote').value=''; clearCoord();
     loadTravels();
 }
-async function fulfillTravel(id) { await sb.from('travels').update({fulfilled:true, fulfilled_at:new Date().toISOString()}).eq('id',id); loadTravels(); }
-async function unfulfillTravel(id) { await sb.from('travels').update({fulfilled:false, fulfilled_at:null}).eq('id',id); loadTravels(); }
+async function unfulfillTravel(id) { await sb.from('travels').update({fulfilled:false, fulfilled_at:null, review:null}).eq('id',id); loadTravels(); }
 
 // ==================== RESTAURANTS ====================
 function switchRestStatus(s) {
@@ -512,7 +505,7 @@ async function loadRestaurants() {
         const note = r.note ? `<div class="card-note">${esc(r.note)}</div>` : '';
         const review = (restStatus==='visited' && r.review) ? `<div class="review-box">&#128221; ${esc(r.review)}</div>` : '';
         const act = restStatus==='pending'
-            ? `<button class="btn btn-rest btn-small" onclick="openVisitModal(${r.id})">&#127860; 去过了</button>`
+            ? `<button class="btn btn-rest btn-small" onclick="openDoneModal(${r.id},'restaurant')">&#127860; 去过了</button>`
             : `<button class="btn btn-outline btn-small" onclick="unvisitRest(${r.id})">撤回</button>`;
         let meta = `<span class="member-tag" style="background:${c}18;color:${c}">${esc(r.member?.name)}</span><span>${date}</span>`;
         if (restStatus==='visited' && r.visited_at) meta += `<span>去过 ${r.visited_at}</span>`;
@@ -533,20 +526,51 @@ async function addRestaurant() {
     loadRestaurants();
 }
 
-function openVisitModal(id) {
-    document.getElementById('visitRestId').value = id;
-    document.getElementById('visitDate').value = new Date().toISOString().slice(0,10);
-    document.getElementById('visitReview').value = '';
-    document.getElementById('visitModal').style.display = 'flex';
-}
-function closeVisitModal() { document.getElementById('visitModal').style.display='none'; }
+// ==================== Shared Done Modal ====================
+const MODAL_CONFIG = {
+    travel: {
+        title: '&#9992;&#65039; 记录旅行体验',
+        reviewLabel: '总结 (可选)',
+        placeholder: '旅行感受、推荐理由...',
+        btnClass: 'btn-travel'
+    },
+    restaurant: {
+        title: '&#127860; 记录用餐体验',
+        reviewLabel: '点评 (可选)',
+        placeholder: '味道怎么样？推荐什么菜？',
+        btnClass: 'btn-rest'
+    }
+};
 
-async function submitVisit() {
-    const id = parseInt(document.getElementById('visitRestId').value);
-    const visited_at = document.getElementById('visitDate').value||null;
-    const review = document.getElementById('visitReview').value.trim()||null;
-    await sb.from('restaurants').update({visited:true, visited_at, review}).eq('id',id);
-    closeVisitModal(); loadRestaurants();
+function openDoneModal(id, type) {
+    const cfg = MODAL_CONFIG[type];
+    document.getElementById('doneModalId').value = id;
+    document.getElementById('doneModalType').value = type;
+    document.getElementById('doneModalTitle').innerHTML = cfg.title;
+    document.getElementById('doneModalReviewLabel').textContent = cfg.reviewLabel;
+    document.getElementById('doneModalReview').placeholder = cfg.placeholder;
+    document.getElementById('doneModalDate').value = new Date().toISOString().slice(0,10);
+    document.getElementById('doneModalReview').value = '';
+    const btn = document.getElementById('doneModalBtn');
+    btn.className = 'btn ' + cfg.btnClass;
+    document.getElementById('doneModal').style.display = 'flex';
+}
+
+function closeDoneModal() { document.getElementById('doneModal').style.display = 'none'; }
+
+async function submitDoneModal() {
+    const id = parseInt(document.getElementById('doneModalId').value);
+    const type = document.getElementById('doneModalType').value;
+    const dateVal = document.getElementById('doneModalDate').value || null;
+    const review = document.getElementById('doneModalReview').value.trim() || null;
+
+    if (type === 'travel') {
+        await sb.from('travels').update({fulfilled:true, fulfilled_at:dateVal, review}).eq('id',id);
+        closeDoneModal(); loadTravels();
+    } else {
+        await sb.from('restaurants').update({visited:true, visited_at:dateVal, review}).eq('id',id);
+        closeDoneModal(); loadRestaurants();
+    }
 }
 
 async function unvisitRest(id) {

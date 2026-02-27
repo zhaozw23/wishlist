@@ -28,6 +28,7 @@ CREATE TABLE travels (
     created_at TIMESTAMPTZ DEFAULT now(),
     fulfilled BOOLEAN DEFAULT false,
     fulfilled_at TIMESTAMPTZ,
+    review TEXT,
     lat DOUBLE PRECISION,
     lng DOUBLE PRECISION
 );
