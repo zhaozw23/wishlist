@@ -27,7 +27,9 @@ CREATE TABLE travels (
     member_id BIGINT NOT NULL REFERENCES members(id),
     created_at TIMESTAMPTZ DEFAULT now(),
     fulfilled BOOLEAN DEFAULT false,
-    fulfilled_at TIMESTAMPTZ
+    fulfilled_at TIMESTAMPTZ,
+    lat DOUBLE PRECISION,
+    lng DOUBLE PRECISION
 );
 
 -- Anniversary restaurants

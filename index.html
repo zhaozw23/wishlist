@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Family Wishlist</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
@@ -69,9 +71,23 @@
             <div class="section-icon">&#9992;&#65039;</div>
             <div class="section-title">旅行清单</div>
         </div>
+
+        <!-- Map -->
+        <div class="map-wrapper">
+            <div id="travelMap"></div>
+            <div class="map-legend">
+                <span class="legend-item"><span class="legend-dot pending"></span>想去的</span>
+                <span class="legend-item"><span class="legend-dot visited"></span>去过了</span>
+            </div>
+        </div>
+
         <div class="add-form">
             <div class="form-row">
                 <input type="text" id="travelDest" placeholder="想去哪里..." maxlength="200">
+            </div>
+            <div class="form-row">
+                <input type="text" id="travelCoord" placeholder="坐标 (点击地图或输入: 纬度, 经度)" readonly>
+                <button class="btn btn-outline btn-small" onclick="clearCoord()" title="清除坐标" style="padding:6px 10px">&#10005;</button>
             </div>
             <div class="form-row">
                 <input type="url" id="travelLink" placeholder="相关链接 (可选)">
@@ -272,11 +288,59 @@ let wishStatus = 'active', travelStatus = 'pending', restStatus = 'pending', gif
 function mColor(id) { return COLORS[(id-1)%COLORS.length]; }
 function esc(s) { if(!s)return''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
+// ==================== Map ====================
+let travelMap = null, mapMarkers = [], pickMarker = null;
+
+function initMap() {
+    if (travelMap) return;
+    travelMap = L.map('travelMap', {zoomControl: true}).setView([30, 110], 3);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap',
+        maxZoom: 18
+    }).addTo(travelMap);
+    travelMap.on('click', function(e) {
+        const {lat, lng} = e.latlng;
+        document.getElementById('travelCoord').value = lat.toFixed(5) + ', ' + lng.toFixed(5);
+        if (pickMarker) travelMap.removeLayer(pickMarker);
+        pickMarker = L.circleMarker([lat, lng], {radius:8, color:'#333', fillColor:'#fff', fillOpacity:1, weight:2}).addTo(travelMap);
+    });
+}
+
+function clearCoord() {
+    document.getElementById('travelCoord').value = '';
+    if (pickMarker) { travelMap.removeLayer(pickMarker); pickMarker = null; }
+}
+
+function refreshMapMarkers(allTravels) {
+    if (!travelMap) return;
+    mapMarkers.forEach(m => travelMap.removeLayer(m));
+    mapMarkers = [];
+    const bounds = [];
+    allTravels.forEach(t => {
+        if (t.lat == null || t.lng == null) return;
+        const done = t.fulfilled;
+        const color = done ? '#27ae60' : '#5b8def';
+        const icon = done ? '\u2714' : '\u2708';
+        const marker = L.circleMarker([t.lat, t.lng], {
+            radius: 9, color: '#fff', weight: 2, fillColor: color, fillOpacity: 0.9
+        }).addTo(travelMap);
+        marker.bindPopup(`<b>${esc(t.destination)}</b><br><span style="color:${color}">${done?'已去过':'想去的'}</span>${t.note?'<br>'+esc(t.note):''}`);
+        mapMarkers.push(marker);
+        bounds.push([t.lat, t.lng]);
+    });
+    if (bounds.length > 1) travelMap.fitBounds(bounds, {padding:[30,30], maxZoom:8});
+    else if (bounds.length === 1) travelMap.setView(bounds[0], 6);
+}
+
 // ==================== Tabs ====================
 function switchMainTab(tab) {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab===tab));
     document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
     document.getElementById('tab-'+tab).style.display = 'block';
+    if (tab === 'travel') {
+        if (!travelMap) initMap();
+        else setTimeout(() => travelMap.invalidateSize(), 100);
+    }
 }
 
 // ==================== Members ====================
@@ -377,21 +441,24 @@ function switchTravelStatus(s) {
 }
 
 async function loadTravels() {
-    let q = sb.from('travels').select('*, member:members!member_id(name)');
-    q = q.eq('fulfilled', travelStatus==='done').order('created_at',{ascending:false});
-    const {data,error} = await q;
+    // Load ALL travels for the map, then filter for the list
+    const {data:allData} = await sb.from('travels').select('*, member:members!member_id(name)').order('created_at',{ascending:false});
+    refreshMapMarkers(allData || []);
+
+    const data = (allData||[]).filter(t => t.fulfilled === (travelStatus==='done'));
     const el = document.getElementById('travelList');
-    if (error) { el.innerHTML=`<div class="empty-state">加载失败</div>`; return; }
-    if (!data||!data.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">&#9992;&#65039;</div>${travelStatus==='pending'?'还没有想去的地方，快来添加吧':'还没有去过的旅行'}</div>`; return; }
+    if (!data.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">&#9992;&#65039;</div>${travelStatus==='pending'?'还没有想去的地方，快来添加吧':'还没有去过的旅行'}</div>`; return; }
 
     el.innerHTML = data.map(t => {
         const c = mColor(t.member_id), date = new Date(t.created_at).toLocaleDateString('zh-CN');
         const title = t.link ? `<a href="${esc(t.link)}" target="_blank">${esc(t.destination)}</a>` : esc(t.destination);
         const note = t.note ? `<div class="card-note">${esc(t.note)}</div>` : '';
+        const coordLink = (t.lat!=null && t.lng!=null)
+            ? `<span class="coord-link" onclick="flyTo(${t.lat},${t.lng})">&#128205; ${t.lat.toFixed(2)}, ${t.lng.toFixed(2)}</span>` : '';
         const act = travelStatus==='pending'
             ? `<button class="btn btn-travel btn-small" onclick="fulfillTravel(${t.id})">&#9992;&#65039; 去过了</button>`
             : `<button class="btn btn-outline btn-small" onclick="unfulfillTravel(${t.id})">撤回</button>`;
-        let meta = `<span class="member-tag" style="background:${c}18;color:${c}">${esc(t.member?.name)}</span><span>${date}</span>`;
+        let meta = `<span class="member-tag" style="background:${c}18;color:${c}">${esc(t.member?.name)}</span><span>${date}</span>${coordLink}`;
         if (travelStatus==='done' && t.fulfilled_at) meta += `<span>去过 ${new Date(t.fulfilled_at).toLocaleDateString('zh-CN')}</span>`;
         return `<div class="item-card theme-travel ${travelStatus==='done'?'done':''}" style="border-left-color:${c}">
             <div class="card-info"><div class="card-title">${title}</div>${note}<div class="card-meta">${meta}</div></div>
@@ -399,14 +466,26 @@ async function loadTravels() {
     }).join('');
 }
 
+function flyTo(lat, lng) {
+    if (travelMap) travelMap.flyTo([lat, lng], 8);
+    window.scrollTo({top: document.getElementById('travelMap').offsetTop - 60, behavior:'smooth'});
+}
+
 async function addTravel() {
     const dest = document.getElementById('travelDest').value.trim();
     const link = document.getElementById('travelLink').value.trim();
     const note = document.getElementById('travelNote').value.trim();
+    const coord = document.getElementById('travelCoord').value.trim();
     const mid = parseInt(document.getElementById('currentUser').value);
     if (!dest) return;
-    await sb.from('travels').insert({destination:dest, link:link||null, note:note||null, member_id:mid});
-    document.getElementById('travelDest').value=''; document.getElementById('travelLink').value=''; document.getElementById('travelNote').value='';
+    let lat = null, lng = null;
+    if (coord) {
+        const parts = coord.split(',').map(s => parseFloat(s.trim()));
+        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) { lat = parts[0]; lng = parts[1]; }
+    }
+    await sb.from('travels').insert({destination:dest, link:link||null, note:note||null, member_id:mid, lat, lng});
+    document.getElementById('travelDest').value=''; document.getElementById('travelLink').value='';
+    document.getElementById('travelNote').value=''; clearCoord();
     loadTravels();
 }
 async function fulfillTravel(id) { await sb.from('travels').update({fulfilled:true, fulfilled_at:new Date().toISOString()}).eq('id',id); loadTravels(); }
