@@ -286,10 +286,12 @@ function esc(s) { if(!s)return''; const d=document.createElement('div'); d.textC
 
 // ==================== Map ====================
 let travelMap = null, mapMarkers = [], pickMarker = null;
+let pendingMapData = null; // store data if map not ready yet
+let mapFirstFit = true; // only auto-fit bounds on first load
 
 function initMap() {
     if (travelMap) return;
-    travelMap = L.map('travelMap', {zoomControl: true, minZoom: 2}).setView([30, 110], 3);
+    travelMap = L.map('travelMap', {zoomControl: true, minZoom: 2}).setView([20, 0], 2);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap',
         maxZoom: 18
@@ -303,6 +305,11 @@ function initMap() {
         if (pickMarker) travelMap.removeLayer(pickMarker);
         pickMarker = L.circleMarker([lat, lng], {radius:8, color:'#333', fillColor:'#fff', fillOpacity:1, weight:2}).addTo(travelMap);
     });
+    // If data was loaded before map was ready, render it now
+    if (pendingMapData) {
+        refreshMapMarkers(pendingMapData);
+        pendingMapData = null;
+    }
 }
 
 function clearCoord() {
@@ -310,7 +317,7 @@ function clearCoord() {
     document.getElementById('coordLng').value = '';
     document.getElementById('coordNS').value = 'N';
     document.getElementById('coordEW').value = 'E';
-    if (pickMarker) { travelMap.removeLayer(pickMarker); pickMarker = null; }
+    if (pickMarker && travelMap) { travelMap.removeLayer(pickMarker); pickMarker = null; }
 }
 
 function getCoordValues() {
@@ -323,24 +330,37 @@ function getCoordValues() {
 }
 
 function refreshMapMarkers(allTravels) {
-    if (!travelMap) return;
+    // If map not ready yet, queue the data
+    if (!travelMap) { pendingMapData = allTravels; return; }
+
+    // Clear old markers
     mapMarkers.forEach(m => travelMap.removeLayer(m));
     mapMarkers = [];
     const bounds = [];
+
     allTravels.forEach(t => {
         if (t.lat == null || t.lng == null) return;
-        const done = t.fulfilled;
+        const done = !!t.fulfilled;
         const color = done ? '#27ae60' : '#5b8def';
-        const icon = done ? '\u2714' : '\u2708';
-        const marker = L.circleMarker([t.lat, t.lng], {
-            radius: 9, color: '#fff', weight: 2, fillColor: color, fillOpacity: 0.9
+        const marker = L.marker([t.lat, t.lng], {
+            icon: L.divIcon({
+                className: 'map-pin',
+                html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.3)"></div>`,
+                iconSize: [14, 14],
+                iconAnchor: [7, 7]
+            })
         }).addTo(travelMap);
         marker.bindPopup(`<b>${esc(t.destination)}</b><br><span style="color:${color}">${done?'已去过':'想去的'}</span>${t.note?'<br>'+esc(t.note):''}`);
         mapMarkers.push(marker);
         bounds.push([t.lat, t.lng]);
     });
-    if (bounds.length > 1) travelMap.fitBounds(bounds, {padding:[30,30], maxZoom:8});
-    else if (bounds.length === 1) travelMap.setView(bounds[0], 6);
+
+    // Only auto-fit on first load
+    if (mapFirstFit && bounds.length) {
+        mapFirstFit = false;
+        if (bounds.length > 1) travelMap.fitBounds(bounds, {padding:[40,40], maxZoom:6});
+        else travelMap.setView(bounds[0], 5);
+    }
 }
 
 // ==================== Tabs ====================
@@ -349,8 +369,10 @@ function switchMainTab(tab) {
     document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
     document.getElementById('tab-'+tab).style.display = 'block';
     if (tab === 'travel') {
-        if (!travelMap) initMap();
-        else setTimeout(() => travelMap.invalidateSize(), 100);
+        setTimeout(() => {
+            if (!travelMap) initMap();
+            else travelMap.invalidateSize();
+        }, 50);
     }
 }
 
