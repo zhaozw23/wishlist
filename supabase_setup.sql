@@ -16,7 +16,7 @@ CREATE TABLE wishes (
 );
 
 -- Pre-seed members
-INSERT INTO members (name) VALUES ('Ziwen'), ('Alina');
+INSERT INTO members (name) VALUES ('Ziwen'), ('Yirui');
 
 -- Enable Row Level Security
 ALTER TABLE members ENABLE ROW LEVEL SECURITY;
