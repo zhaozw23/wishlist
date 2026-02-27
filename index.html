@@ -174,19 +174,21 @@ function formatDate(m, d) {
 function renderCountdown() {
     // Together since July 14 - need a start year. I'll assume a reasonable year.
     // We'll show days together as a cumulative count
-    const togetherStart = new Date(2017, 6, 14); // Assuming 2017, adjust if needed
+    const togetherStart = new Date(2024, 6, 14); // 2024-07-14
     const today = new Date(); today.setHours(0,0,0,0);
     const togetherDays = Math.floor((today - togetherStart) / 86400000);
 
     const yiruiBday = daysUntilNextAnnual(2, 5);
     const ziwenBday = daysUntilNextAnnual(1, 27);
     const weddingAnniv = daysUntilNextAnnual(2, 10);
+    const togetherAnniv = daysUntilNextAnnual(7, 14);
     const qixi = daysUntilNextQixi();
 
     const items = [
-        { emoji: '\u{1F491}', label: '在一起', days: togetherDays, daysLabel: '天', date: '7月14日起', isTogether: true },
+        { emoji: '\u{1F491}', label: '在一起', days: togetherDays, daysLabel: '天', date: '2024.7.14 起', isTogether: true },
         { emoji: '\u{1F382}', label: 'Yirui 生日', days: yiruiBday, daysLabel: '天后', date: '2月5日' },
         { emoji: '\u{1F382}', label: 'Ziwen 生日', days: ziwenBday, daysLabel: '天后', date: '1月27日' },
+        { emoji: '\u{1F495}', label: '在一起纪念日', days: togetherAnniv, daysLabel: '天后', date: '7月14日' },
         { emoji: '\u{1F48D}', label: '求婚纪念日', days: qixi.days, daysLabel: '天后', date: '七夕' },
         { emoji: '\u{1F492}', label: '结婚纪念日', days: weddingAnniv, daysLabel: '天后', date: '2月10日' },
     ];
