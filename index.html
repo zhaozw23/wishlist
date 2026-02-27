@@ -9,6 +9,21 @@
 </head>
 <body>
 
+<!-- Password gate -->
+<div id="loginScreen" style="display:none">
+    <div class="login-box">
+        <h1>Family Wishlist</h1>
+        <p>请输入密码访问</p>
+        <div class="form-row">
+            <input type="password" id="loginPassword" placeholder="密码" autofocus>
+            <button class="btn btn-primary" onclick="checkPassword()">进入</button>
+        </div>
+        <p id="loginError" style="color:#e74c3c;font-size:0.85rem;margin-top:8px;display:none">密码错误</p>
+    </div>
+</div>
+
+<!-- Main app (hidden until authenticated) -->
+<div id="appMain" style="display:none">
 <header>
     <h1>Family Wishlist</h1>
     <div class="user-selector">
@@ -53,7 +68,44 @@
     </div>
 </div>
 
+</div><!-- end appMain -->
+
 <script>
+const PWD_HASH = 'ec38f5b04b1f1445b150678d81f4019f5e503d83eff4be3b49d638b1812738c3';
+
+async function sha256(text) {
+    const data = new TextEncoder().encode(text);
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function checkPassword() {
+    const input = document.getElementById('loginPassword').value;
+    const hash = await sha256(input);
+    if (hash === PWD_HASH) {
+        localStorage.setItem('wishlist_auth', hash);
+        showApp();
+    } else {
+        document.getElementById('loginError').style.display = 'block';
+    }
+}
+
+function showApp() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appMain').style.display = 'block';
+    loadMembers().then(loadWishes);
+}
+
+function initAuth() {
+    if (localStorage.getItem('wishlist_auth') === PWD_HASH) {
+        showApp();
+    } else {
+        document.getElementById('loginScreen').style.display = 'flex';
+    }
+}
+
+document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+
 const SUPABASE_URL = 'https://vcbzdslaoumewqhjmojr.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjYnpkc2xhb3VtZXdxaGptb2pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxNjI1OTcsImV4cCI6MjA4NzczODU5N30.WhfPPljwTsm_kUEx02hWF_nU6_oqrKJmF4pqjg8Nhfw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -203,7 +255,7 @@ document.getElementById('wishLink').addEventListener('keydown', e => { if (e.key
 document.getElementById('memberName').addEventListener('keydown', e => { if (e.key === 'Enter') addMember(); });
 
 // Init
-loadMembers().then(loadWishes);
+initAuth();
 </script>
 </body>
 </html>
