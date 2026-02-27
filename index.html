@@ -417,11 +417,11 @@ async function loadWishes() {
         const title = w.link ? `<a href="${esc(w.link)}" target="_blank">${esc(w.title)}</a>` : esc(w.title);
         const del = `<button class="btn-delete" onclick="deleteItem('wishes',${w.id})" title="删除">&times;</button>`;
         const act = wishStatus==='active'
-            ? `<button class="btn btn-primary btn-small" onclick="fulfillWish(${w.id})">&#10084; 实现</button>${del}`
-            : `<button class="btn btn-outline btn-small" onclick="unfulfillWish(${w.id})">撤回</button>${del}`;
+            ? `<button class="btn btn-primary btn-small" onclick="fulfillWish(${w.id})">&#10084; 实现</button>`
+            : `<button class="btn btn-outline btn-small" onclick="unfulfillWish(${w.id})">撤回</button>`;
         let meta = `<span class="member-tag" style="background:${c}18;color:${c}">${esc(w.member?.name)}</span><span>${date}</span>`;
         if (wishStatus==='fulfilled' && w.fulfiller?.name) meta += `<span>由 ${esc(w.fulfiller.name)} 实现</span>`;
-        return `<div class="item-card ${wishStatus==='fulfilled'?'done':''}" style="border-left-color:${c}">
+        return `<div class="item-card ${wishStatus==='fulfilled'?'done':''}" style="border-left-color:${c}">${del}
             <div class="card-info"><div class="card-title">${title}</div><div class="card-meta">${meta}</div></div>
             <div class="card-actions">${act}</div></div>`;
     }).join('');
@@ -470,11 +470,11 @@ async function loadTravels() {
         const reviewHtml = (travelStatus==='done' && t.review) ? `<div class="review-box">&#128221; ${esc(t.review)}</div>` : '';
         const del = `<button class="btn-delete" onclick="deleteItem('travels',${t.id})" title="删除">&times;</button>`;
         const act = travelStatus==='pending'
-            ? `<button class="btn btn-travel btn-small" onclick="openDoneModal(${t.id},'travel')">&#9992;&#65039; 去过了</button>${del}`
-            : `<button class="btn btn-outline btn-small" onclick="unfulfillTravel(${t.id})">撤回</button>${del}`;
+            ? `<button class="btn btn-travel btn-small" onclick="openDoneModal(${t.id},'travel')">&#9992;&#65039; 去过了</button>`
+            : `<button class="btn btn-outline btn-small" onclick="unfulfillTravel(${t.id})">撤回</button>`;
         let meta = `<span class="member-tag" style="background:${c}18;color:${c}">${esc(t.member?.name)}</span><span>${date}</span>${coordLink}`;
         if (travelStatus==='done' && t.fulfilled_at) meta += `<span>去过 ${new Date(t.fulfilled_at).toLocaleDateString('zh-CN')}</span>`;
-        return `<div class="item-card theme-travel ${travelStatus==='done'?'done':''}" style="border-left-color:${c}">
+        return `<div class="item-card theme-travel ${travelStatus==='done'?'done':''}" style="border-left-color:${c}">${del}
             <div class="card-info"><div class="card-title">${title}</div>${note}${reviewHtml}<div class="card-meta">${meta}</div></div>
             <div class="card-actions">${act}</div></div>`;
     }).join('');
@@ -523,11 +523,11 @@ async function loadRestaurants() {
         const review = (restStatus==='visited' && r.review) ? `<div class="review-box">&#128221; ${esc(r.review)}</div>` : '';
         const del = `<button class="btn-delete" onclick="deleteItem('restaurants',${r.id})" title="删除">&times;</button>`;
         const act = restStatus==='pending'
-            ? `<button class="btn btn-rest btn-small" onclick="openDoneModal(${r.id},'restaurant')">&#127860; 去过了</button>${del}`
-            : `<button class="btn btn-outline btn-small" onclick="unvisitRest(${r.id})">撤回</button>${del}`;
+            ? `<button class="btn btn-rest btn-small" onclick="openDoneModal(${r.id},'restaurant')">&#127860; 去过了</button>`
+            : `<button class="btn btn-outline btn-small" onclick="unvisitRest(${r.id})">撤回</button>`;
         let meta = `<span class="member-tag" style="background:${c}18;color:${c}">${esc(r.member?.name)}</span><span>${date}</span>`;
         if (restStatus==='visited' && r.visited_at) meta += `<span>去过 ${r.visited_at}</span>`;
-        return `<div class="item-card theme-rest ${restStatus==='visited'?'done':''}" style="border-left-color:${c}">
+        return `<div class="item-card theme-rest ${restStatus==='visited'?'done':''}" style="border-left-color:${c}">${del}
             <div class="card-info"><div class="card-title">${title}</div>${note}${review}<div class="card-meta">${meta}</div></div>
             <div class="card-actions">${act}</div></div>`;
     }).join('');

@@ -364,24 +364,28 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
 .btn-small { padding: 6px 14px; font-size: 0.85rem; }
 
 .btn-delete {
+    position: absolute;
+    top: 6px;
+    right: 6px;
     background: none;
     border: 1px solid transparent;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 0.85rem;
-    width: 26px;
-    height: 26px;
+    font-size: 0.8rem;
+    width: 22px;
+    height: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.3;
+    opacity: 0;
     padding: 0;
     transition: all 0.2s;
     line-height: 1;
     color: var(--text-light);
 }
+.item-card:hover .btn-delete { opacity: 0.4; }
 .btn-delete:hover {
-    opacity: 1;
+    opacity: 1 !important;
     color: #e74c3c;
     border-color: #e74c3c;
     background: #fef0f0;
@@ -465,6 +469,7 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
     transition: transform 0.2s;
     border: 1px solid var(--border);
     border-left: 4px solid var(--gift-color);
+    position: relative;
 }
 
 .item-card:hover { transform: translateY(-1px); }
