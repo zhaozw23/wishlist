@@ -9,11 +9,15 @@
 </head>
 <body>
 
+<!-- Floating hearts background -->
+<div class="hearts-bg" id="heartsBg"></div>
+
 <!-- Password gate -->
 <div id="loginScreen" style="display:none">
     <div class="login-box">
+        <div class="heart-icon">&#10084;</div>
         <h1>Family Wishlist</h1>
-        <p>请输入密码访问</p>
+        <p>&#10084; 请输入密码访问 &#10084;</p>
         <div class="form-row">
             <input type="password" id="loginPassword" placeholder="密码" autofocus>
             <button class="btn btn-primary" onclick="checkPassword()">进入</button>
@@ -25,7 +29,7 @@
 <!-- Main app (hidden until authenticated) -->
 <div id="appMain" style="display:none">
 <header>
-    <h1>Family Wishlist</h1>
+    <h1>&#10084; Family Wishlist</h1>
     <div class="user-selector">
         <span>当前用户:</span>
         <select id="currentUser"></select>
@@ -33,9 +37,12 @@
 </header>
 
 <div class="container">
+    <!-- Countdown section -->
+    <div class="countdown-section" id="countdownSection"></div>
+
     <!-- Add wish -->
     <div class="add-form">
-        <h2>许个愿</h2>
+        <h2>&#10024; 许个愿</h2>
         <div class="form-row">
             <input type="text" id="wishTitle" placeholder="想要什么..." maxlength="200">
         </div>
@@ -59,7 +66,7 @@
 
     <!-- Member management -->
     <div class="member-section">
-        <h2>家庭成员</h2>
+        <h2>&#128106; 家庭成员</h2>
         <div class="member-list" id="memberList"></div>
         <div class="form-row">
             <input type="text" id="memberName" placeholder="新成员名字" maxlength="50">
@@ -71,6 +78,7 @@
 </div><!-- end appMain -->
 
 <script>
+// ==================== Auth ====================
 const PWD_HASH = 'ec38f5b04b1f1445b150678d81f4019f5e503d83eff4be3b49d638b1812738c3';
 
 async function sha256(text) {
@@ -93,10 +101,12 @@ async function checkPassword() {
 function showApp() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appMain').style.display = 'block';
+    renderCountdown();
     loadMembers().then(loadWishes);
 }
 
 function initAuth() {
+    createFloatingHearts();
     if (localStorage.getItem('wishlist_auth') === PWD_HASH) {
         showApp();
     } else {
@@ -106,11 +116,103 @@ function initAuth() {
 
 document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
 
+// ==================== Floating Hearts ====================
+function createFloatingHearts() {
+    const container = document.getElementById('heartsBg');
+    const hearts = ['\u2764', '\u2765', '\u2763', '\u2661'];
+    for (let i = 0; i < 15; i++) {
+        const span = document.createElement('span');
+        span.textContent = hearts[i % hearts.length];
+        span.style.left = Math.random() * 100 + '%';
+        span.style.animationDelay = Math.random() * 15 + 's';
+        span.style.animationDuration = (12 + Math.random() * 10) + 's';
+        span.style.fontSize = (0.8 + Math.random() * 1.2) + 'rem';
+        container.appendChild(span);
+    }
+}
+
+// ==================== Countdown ====================
+// Qixi (lunar July 7) dates for upcoming years
+const QIXI_DATES = {
+    2025: '2025-08-29', 2026: '2026-08-19', 2027: '2027-08-08',
+    2028: '2028-08-26', 2029: '2029-08-16', 2030: '2030-08-05',
+    2031: '2031-08-24', 2032: '2032-08-12', 2033: '2033-08-01',
+    2034: '2034-08-20', 2035: '2035-08-09'
+};
+
+function daysUntilNextAnnual(month, day) {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    let target = new Date(today.getFullYear(), month - 1, day);
+    if (target < today) target = new Date(today.getFullYear() + 1, month - 1, day);
+    return Math.ceil((target - today) / 86400000);
+}
+
+function daysUntilNextQixi() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    for (let y = today.getFullYear(); y <= 2035; y++) {
+        if (QIXI_DATES[y]) {
+            const d = new Date(QIXI_DATES[y] + 'T00:00:00');
+            if (d >= today) return { days: Math.ceil((d - today) / 86400000), date: QIXI_DATES[y] };
+        }
+    }
+    return { days: '?', date: '' };
+}
+
+function daysSince(month, day, year) {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const start = new Date(year || today.getFullYear(), month - 1, day);
+    return Math.floor((today - start) / 86400000);
+}
+
+function formatDate(m, d) {
+    return `${m}月${d}日`;
+}
+
+function renderCountdown() {
+    // Together since July 14 - need a start year. I'll assume a reasonable year.
+    // We'll show days together as a cumulative count
+    const togetherStart = new Date(2017, 6, 14); // Assuming 2017, adjust if needed
+    const today = new Date(); today.setHours(0,0,0,0);
+    const togetherDays = Math.floor((today - togetherStart) / 86400000);
+
+    const yiruiBday = daysUntilNextAnnual(2, 5);
+    const ziwenBday = daysUntilNextAnnual(1, 27);
+    const weddingAnniv = daysUntilNextAnnual(2, 10);
+    const qixi = daysUntilNextQixi();
+
+    const items = [
+        { emoji: '\u{1F491}', label: '在一起', days: togetherDays, daysLabel: '天', date: '7月14日起', isTogether: true },
+        { emoji: '\u{1F382}', label: 'Yirui 生日', days: yiruiBday, daysLabel: '天后', date: '2月5日' },
+        { emoji: '\u{1F382}', label: 'Ziwen 生日', days: ziwenBday, daysLabel: '天后', date: '1月27日' },
+        { emoji: '\u{1F48D}', label: '求婚纪念日', days: qixi.days, daysLabel: '天后', date: '七夕' },
+        { emoji: '\u{1F492}', label: '结婚纪念日', days: weddingAnniv, daysLabel: '天后', date: '2月10日' },
+    ];
+
+    // If days === 0, show "今天!"
+    const section = document.getElementById('countdownSection');
+    section.innerHTML = '<div class="countdown-grid">' + items.map(item => {
+        const isToday = item.days === 0 && !item.isTogether;
+        const daysDisplay = isToday ? '&#127881;' : item.days;
+        const labelDisplay = isToday ? '就是今天!' : item.daysLabel;
+        return `<div class="countdown-card ${item.isTogether ? 'together' : ''}">
+            <div class="emoji">${item.emoji}</div>
+            <div class="label">${item.label}</div>
+            <div class="days">${daysDisplay}</div>
+            <div class="days-label">${labelDisplay}</div>
+            <div class="date-info">${item.date}</div>
+        </div>`;
+    }).join('') + '</div>';
+}
+
+// ==================== Supabase ====================
 const SUPABASE_URL = 'https://vcbzdslaoumewqhjmojr.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjYnpkc2xhb3VtZXdxaGptb2pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxNjI1OTcsImV4cCI6MjA4NzczODU5N30.WhfPPljwTsm_kUEx02hWF_nU6_oqrKJmF4pqjg8Nhfw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const COLORS = ['#4a90d9','#e74c3c','#27ae60','#f39c12','#9b59b6','#1abc9c','#e67e22','#3498db'];
+const COLORS = ['#e8607c','#f5a0b0','#c06080','#d4789a','#b05070','#e090a0','#a04868','#d06888'];
 let members = [];
 let currentStatus = 'active';
 let filterMember = null;
@@ -167,7 +269,7 @@ async function loadWishes() {
 
     if (error) { list.innerHTML = `<div class="empty-state">加载失败: ${esc(error.message)}</div>`; return; }
     if (!data || !data.length) {
-        list.innerHTML = `<div class="empty-state">${currentStatus === 'active' ? '暂无愿望，快来许愿吧' : '还没有已实现的愿望'}</div>`;
+        list.innerHTML = `<div class="empty-state">${currentStatus === 'active' ? '&#10024; 暂无愿望，快来许愿吧 &#10024;' : '还没有已实现的愿望'}</div>`;
         return;
     }
 
@@ -182,7 +284,7 @@ async function loadWishes() {
 
         let actionHtml = '';
         if (currentStatus === 'active') {
-            actionHtml = `<button class="btn btn-success btn-small" onclick="fulfill(${w.id})">实现</button>`;
+            actionHtml = `<button class="btn btn-success btn-small" onclick="fulfill(${w.id})">&#10084; 实现</button>`;
         } else {
             actionHtml = `<button class="btn btn-outline btn-small" onclick="unfulfill(${w.id})">撤回</button>`;
         }
