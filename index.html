@@ -153,13 +153,19 @@
         </div>
     </div>
 
-    <!-- Members -->
-    <div class="member-section">
-        <h2>&#128106; 家庭成员</h2>
-        <div class="member-list" id="memberList"></div>
-        <div class="form-row">
-            <input type="text" id="memberName" placeholder="新成员名字" maxlength="50">
-            <button class="btn btn-outline" onclick="addMember()">添加成员</button>
+    <!-- Settings modal -->
+    <div class="modal-overlay" id="settingsModal" style="display:none" onclick="if(event.target===this)closeSettings()">
+        <div class="modal-box">
+            <h2>&#9881;&#65039; 设置</h2>
+            <h3 style="font-size:0.95rem;margin-bottom:10px;color:var(--text)">&#128106; 家庭成员</h3>
+            <div class="member-list" id="memberList" style="margin-bottom:12px"></div>
+            <div class="form-row">
+                <input type="text" id="memberName" placeholder="新成员名字" maxlength="50">
+                <button class="btn btn-outline" onclick="addMember()">添加</button>
+            </div>
+            <div class="form-row" style="justify-content:flex-end;margin-top:16px">
+                <button class="btn btn-primary" onclick="closeSettings()">完成</button>
+            </div>
         </div>
     </div>
 </div>
@@ -177,6 +183,10 @@
     <div class="nav-item" data-tab="restaurant" onclick="switchMainTab('restaurant')">
         <span class="nav-icon">&#127860;</span>
         <span class="nav-label">纪念日餐厅</span>
+    </div>
+    <div class="nav-item" onclick="openSettings()">
+        <span class="nav-icon">&#9881;&#65039;</span>
+        <span class="nav-label">设置</span>
     </div>
 </nav>
 
@@ -277,11 +287,26 @@ const sb = supabase.createClient(
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjYnpkc2xhb3VtZXdxaGptb2pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxNjI1OTcsImV4cCI6MjA4NzczODU5N30.WhfPPljwTsm_kUEx02hWF_nU6_oqrKJmF4pqjg8Nhfw'
 );
 
-const COLORS = ['#e8607c','#5b8def','#f0a030','#27ae60','#9b59b6','#1abc9c','#e67e22','#3498db'];
+const NAME_COLORS = {'ziwen': '#5b8def', 'yirui': '#e8607c'};
+const FALLBACK_COLORS = ['#f0a030','#27ae60','#9b59b6','#1abc9c','#e67e22','#3498db'];
 let members = [];
 let wishStatus = 'active', travelStatus = 'pending', restStatus = 'pending', giftFilter = null;
 
-function mColor(id) { return COLORS[(id-1)%COLORS.length]; }
+function mColor(id) {
+    const m = members.find(m => m.id === id);
+    if (m) {
+        const named = NAME_COLORS[m.name.toLowerCase()];
+        if (named) return named;
+    }
+    // Fallback for other members
+    let idx = 0;
+    for (const mem of members) {
+        if (NAME_COLORS[mem.name.toLowerCase()]) continue;
+        if (mem.id === id) return FALLBACK_COLORS[idx % FALLBACK_COLORS.length];
+        idx++;
+    }
+    return FALLBACK_COLORS[0];
+}
 function esc(s) { if(!s)return''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
 // ==================== Map ====================
@@ -640,6 +665,9 @@ async function deleteItem(table, id) {
     else if (table === 'travels') loadTravels();
     else if (table === 'restaurants') loadRestaurants();
 }
+
+function openSettings() { document.getElementById('settingsModal').style.display = 'flex'; }
+function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
 
 async function unvisitRest(id) {
     await sb.from('restaurants').update({visited:false, visited_at:null, review:null}).eq('id',id);
