@@ -9,10 +9,9 @@
 </head>
 <body>
 
-<!-- Floating hearts background -->
 <div class="hearts-bg" id="heartsBg"></div>
 
-<!-- Password gate -->
+<!-- Login -->
 <div id="loginScreen" style="display:none">
     <div class="login-box">
         <div class="heart-icon">&#10084;</div>
@@ -26,7 +25,7 @@
     </div>
 </div>
 
-<!-- Main app -->
+<!-- App -->
 <div id="appMain" style="display:none">
 <header>
     <h1>&#10084; Family Wishlist</h1>
@@ -37,20 +36,15 @@
 </header>
 
 <div class="container">
-    <!-- Countdown -->
     <div class="countdown-section" id="countdownSection"></div>
 
-    <!-- Main tabs -->
-    <div class="main-tabs">
-        <div class="main-tab active" data-tab="gifts" onclick="switchMainTab('gifts')">&#127873; 礼物区</div>
-        <div class="main-tab" data-tab="travel" onclick="switchMainTab('travel')">&#9992;&#65039; Travel</div>
-        <div class="main-tab" data-tab="restaurant" onclick="switchMainTab('restaurant')">&#127860; 纪念日餐厅</div>
-    </div>
-
-    <!-- ==================== GIFTS TAB ==================== -->
+    <!-- ========== GIFTS ========== -->
     <div class="tab-content" id="tab-gifts">
+        <div class="section-header" data-theme="gifts">
+            <div class="section-icon">&#127873;</div>
+            <div class="section-title">礼物心愿</div>
+        </div>
         <div class="add-form">
-            <h2>&#10024; 许个愿</h2>
             <div class="form-row">
                 <input type="text" id="wishTitle" placeholder="想要什么..." maxlength="200">
             </div>
@@ -59,40 +53,50 @@
                 <button class="btn btn-primary" onclick="addWish()">添加</button>
             </div>
         </div>
-        <div class="sub-tabs">
-            <div class="tab active" data-status="active" onclick="switchWishStatus('active')">想要的</div>
-            <div class="tab" data-status="fulfilled" onclick="switchWishStatus('fulfilled')">已实现</div>
+        <div data-theme="gifts">
+            <div class="sub-tabs">
+                <div class="tab active" data-status="active" onclick="switchWishStatus('active')">&#10024; 想要的</div>
+                <div class="tab" data-status="fulfilled" onclick="switchWishStatus('fulfilled')">&#10004; 已实现</div>
+            </div>
         </div>
         <div class="filter-row" id="giftFilterRow"></div>
         <div id="wishList"></div>
     </div>
 
-    <!-- ==================== TRAVEL TAB ==================== -->
+    <!-- ========== TRAVEL ========== -->
     <div class="tab-content" id="tab-travel" style="display:none">
+        <div class="section-header" data-theme="travel">
+            <div class="section-icon">&#9992;&#65039;</div>
+            <div class="section-title">旅行清单</div>
+        </div>
         <div class="add-form">
-            <h2>&#127758; 想去哪里？</h2>
             <div class="form-row">
-                <input type="text" id="travelDest" placeholder="目的地..." maxlength="200">
+                <input type="text" id="travelDest" placeholder="想去哪里..." maxlength="200">
             </div>
             <div class="form-row">
                 <input type="url" id="travelLink" placeholder="相关链接 (可选)">
             </div>
             <div class="form-row">
                 <input type="text" id="travelNote" placeholder="备注 (可选)" maxlength="500">
-                <button class="btn btn-primary" onclick="addTravel()">添加</button>
+                <button class="btn btn-travel" onclick="addTravel()">添加</button>
             </div>
         </div>
-        <div class="sub-tabs">
-            <div class="tab active" data-status="pending" onclick="switchTravelStatus('pending')">想去的</div>
-            <div class="tab" data-status="done" onclick="switchTravelStatus('done')">去过了</div>
+        <div data-theme="travel">
+            <div class="sub-tabs">
+                <div class="tab active" data-status="pending" onclick="switchTravelStatus('pending')">&#127758; 想去的</div>
+                <div class="tab" data-status="done" onclick="switchTravelStatus('done')">&#10004; 去过了</div>
+            </div>
         </div>
         <div id="travelList"></div>
     </div>
 
-    <!-- ==================== RESTAURANT TAB ==================== -->
+    <!-- ========== RESTAURANT ========== -->
     <div class="tab-content" id="tab-restaurant" style="display:none">
+        <div class="section-header" data-theme="restaurant">
+            <div class="section-icon">&#127860;</div>
+            <div class="section-title">纪念日餐厅</div>
+        </div>
         <div class="add-form">
-            <h2>&#127860; 想去哪家餐厅？</h2>
             <div class="form-row">
                 <input type="text" id="restName" placeholder="餐厅名..." maxlength="200">
             </div>
@@ -101,37 +105,43 @@
             </div>
             <div class="form-row">
                 <input type="text" id="restNote" placeholder="备注 (可选)" maxlength="500">
-                <button class="btn btn-primary" onclick="addRestaurant()">添加</button>
+                <button class="btn btn-rest" onclick="addRestaurant()">添加</button>
             </div>
         </div>
-        <div class="sub-tabs">
-            <div class="tab active" data-status="pending" onclick="switchRestStatus('pending')">想去的</div>
-            <div class="tab" data-status="visited" onclick="switchRestStatus('visited')">去过了</div>
+        <div data-theme="restaurant">
+            <div class="sub-tabs">
+                <div class="tab active" data-status="pending" onclick="switchRestStatus('pending')">&#128141; 想去的</div>
+                <div class="tab" data-status="visited" onclick="switchRestStatus('visited')">&#10004; 去过了</div>
+            </div>
         </div>
         <div id="restaurantList"></div>
     </div>
 
-    <!-- Visit modal for restaurant -->
+    <!-- Visit modal -->
     <div class="modal-overlay" id="visitModal" style="display:none" onclick="if(event.target===this)closeVisitModal()">
         <div class="modal-box">
             <h2>&#127860; 记录用餐体验</h2>
             <input type="hidden" id="visitRestId">
             <div class="form-row">
                 <label>去的日期</label>
+            </div>
+            <div class="form-row">
                 <input type="date" id="visitDate">
             </div>
             <div class="form-row">
                 <label>点评</label>
+            </div>
+            <div class="form-row">
                 <textarea id="visitReview" rows="3" placeholder="味道怎么样？推荐什么菜？"></textarea>
             </div>
             <div class="form-row" style="justify-content:flex-end;gap:10px">
                 <button class="btn btn-outline" onclick="closeVisitModal()">取消</button>
-                <button class="btn btn-primary" onclick="submitVisit()">确认</button>
+                <button class="btn btn-rest" onclick="submitVisit()">确认</button>
             </div>
         </div>
     </div>
 
-    <!-- Member management -->
+    <!-- Members -->
     <div class="member-section">
         <h2>&#128106; 家庭成员</h2>
         <div class="member-list" id="memberList"></div>
@@ -141,7 +151,24 @@
         </div>
     </div>
 </div>
-</div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+    <div class="nav-item active" data-tab="gifts" onclick="switchMainTab('gifts')">
+        <span class="nav-icon">&#127873;</span>
+        <span class="nav-label">礼物心愿</span>
+    </div>
+    <div class="nav-item" data-tab="travel" onclick="switchMainTab('travel')">
+        <span class="nav-icon">&#9992;&#65039;</span>
+        <span class="nav-label">旅行清单</span>
+    </div>
+    <div class="nav-item" data-tab="restaurant" onclick="switchMainTab('restaurant')">
+        <span class="nav-icon">&#127860;</span>
+        <span class="nav-label">纪念日餐厅</span>
+    </div>
+</nav>
+
+</div><!-- end appMain -->
 
 <script>
 // ==================== Auth ====================
@@ -173,258 +200,202 @@ function showApp() {
 
 function initAuth() {
     createFloatingHearts();
-    if (localStorage.getItem('wishlist_auth') === PWD_HASH) {
-        showApp();
-    } else {
-        document.getElementById('loginScreen').style.display = 'flex';
-    }
+    if (localStorage.getItem('wishlist_auth') === PWD_HASH) showApp();
+    else document.getElementById('loginScreen').style.display = 'flex';
 }
 
 document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
 
-// ==================== Floating Hearts ====================
+// ==================== Hearts ====================
 function createFloatingHearts() {
-    const container = document.getElementById('heartsBg');
-    const hearts = ['\u2764', '\u2765', '\u2763', '\u2661'];
+    const c = document.getElementById('heartsBg');
+    const h = ['\u2764','\u2765','\u2763','\u2661'];
     for (let i = 0; i < 15; i++) {
-        const span = document.createElement('span');
-        span.textContent = hearts[i % hearts.length];
-        span.style.left = Math.random() * 100 + '%';
-        span.style.animationDelay = Math.random() * 15 + 's';
-        span.style.animationDuration = (12 + Math.random() * 10) + 's';
-        span.style.fontSize = (0.8 + Math.random() * 1.2) + 'rem';
-        container.appendChild(span);
+        const s = document.createElement('span');
+        s.textContent = h[i % h.length];
+        s.style.left = Math.random()*100+'%';
+        s.style.animationDelay = Math.random()*15+'s';
+        s.style.animationDuration = (12+Math.random()*10)+'s';
+        s.style.fontSize = (0.8+Math.random()*1.2)+'rem';
+        c.appendChild(s);
     }
 }
 
 // ==================== Countdown ====================
-const QIXI_DATES = {
-    2025:'2025-08-29',2026:'2026-08-19',2027:'2027-08-08',2028:'2028-08-26',
-    2029:'2029-08-16',2030:'2030-08-05',2031:'2031-08-24',2032:'2032-08-12',
-    2033:'2033-08-01',2034:'2034-08-20',2035:'2035-08-09'
-};
+const QIXI = {2025:'2025-08-29',2026:'2026-08-19',2027:'2027-08-08',2028:'2028-08-26',2029:'2029-08-16',2030:'2030-08-05',2031:'2031-08-24',2032:'2032-08-12',2033:'2033-08-01',2034:'2034-08-20',2035:'2035-08-09'};
 
-function daysUntilNextAnnual(month, day) {
-    const today = new Date(); today.setHours(0,0,0,0);
-    let target = new Date(today.getFullYear(), month - 1, day);
-    if (target < today) target = new Date(today.getFullYear() + 1, month - 1, day);
-    return Math.ceil((target - today) / 86400000);
+function daysUntil(m,d) {
+    const t = new Date(); t.setHours(0,0,0,0);
+    let x = new Date(t.getFullYear(), m-1, d);
+    if (x < t) x = new Date(t.getFullYear()+1, m-1, d);
+    return Math.ceil((x-t)/864e5);
 }
 
-function daysUntilNextQixi() {
-    const today = new Date(); today.setHours(0,0,0,0);
-    for (let y = today.getFullYear(); y <= 2035; y++) {
-        if (QIXI_DATES[y]) {
-            const d = new Date(QIXI_DATES[y] + 'T00:00:00');
-            if (d >= today) return { days: Math.ceil((d - today) / 86400000), date: QIXI_DATES[y] };
-        }
-    }
-    return { days: '?', date: '' };
+function nextQixi() {
+    const t = new Date(); t.setHours(0,0,0,0);
+    for (let y = t.getFullYear(); y <= 2035; y++)
+        if (QIXI[y]) { const d = new Date(QIXI[y]+'T00:00:00'); if (d >= t) return Math.ceil((d-t)/864e5); }
+    return '?';
 }
 
 function renderCountdown() {
-    const togetherStart = new Date(2024, 6, 14);
-    const today = new Date(); today.setHours(0,0,0,0);
-    const togetherDays = Math.floor((today - togetherStart) / 86400000);
-    const yiruiBday = daysUntilNextAnnual(2, 5);
-    const ziwenBday = daysUntilNextAnnual(1, 27);
-    const weddingAnniv = daysUntilNextAnnual(2, 10);
-    const togetherAnniv = daysUntilNextAnnual(7, 14);
-    const qixi = daysUntilNextQixi();
-
+    const start = new Date(2024,6,14), now = new Date(); now.setHours(0,0,0,0);
+    const together = Math.floor((now-start)/864e5);
     const items = [
-        { emoji: '\u{1F491}', label: '在一起', days: togetherDays, daysLabel: '天', date: '2024.7.14 起', isTogether: true },
-        { emoji: '\u{1F382}', label: 'Yirui 生日', days: yiruiBday, daysLabel: '天后', date: '2月5日' },
-        { emoji: '\u{1F382}', label: 'Ziwen 生日', days: ziwenBday, daysLabel: '天后', date: '1月27日' },
-        { emoji: '\u{1F495}', label: '在一起纪念日', days: togetherAnniv, daysLabel: '天后', date: '7月14日' },
-        { emoji: '\u{1F48D}', label: '求婚纪念日', days: qixi.days, daysLabel: '天后', date: '七夕' },
-        { emoji: '\u{1F492}', label: '结婚纪念日', days: weddingAnniv, daysLabel: '天后', date: '2月10日' },
+        {e:'\u{1F491}',l:'在一起',d:together,u:'天',info:'2024.7.14 起',t:true},
+        {e:'\u{1F382}',l:'Yirui 生日',d:daysUntil(2,5),u:'天后',info:'2月5日'},
+        {e:'\u{1F382}',l:'Ziwen 生日',d:daysUntil(1,27),u:'天后',info:'1月27日'},
+        {e:'\u{1F495}',l:'在一起纪念日',d:daysUntil(7,14),u:'天后',info:'7月14日'},
+        {e:'\u{1F48D}',l:'求婚纪念日',d:nextQixi(),u:'天后',info:'七夕'},
+        {e:'\u{1F492}',l:'结婚纪念日',d:daysUntil(2,10),u:'天后',info:'2月10日'},
     ];
-
-    document.getElementById('countdownSection').innerHTML = '<div class="countdown-grid">' + items.map(item => {
-        const isToday = item.days === 0 && !item.isTogether;
-        const daysDisplay = isToday ? '&#127881;' : item.days;
-        const labelDisplay = isToday ? '就是今天!' : item.daysLabel;
-        return `<div class="countdown-card ${item.isTogether ? 'together' : ''}">
-            <div class="emoji">${item.emoji}</div>
-            <div class="label">${item.label}</div>
-            <div class="days">${daysDisplay}</div>
-            <div class="days-label">${labelDisplay}</div>
-            <div class="date-info">${item.date}</div>
-        </div>`;
+    document.getElementById('countdownSection').innerHTML = '<div class="countdown-grid">' + items.map(i => {
+        const today = i.d===0 && !i.t;
+        return `<div class="countdown-card ${i.t?'together':''}">
+            <div class="emoji">${i.e}</div><div class="label">${i.l}</div>
+            <div class="days">${today?'&#127881;':i.d}</div>
+            <div class="days-label">${today?'就是今天!':i.u}</div>
+            <div class="date-info">${i.info}</div></div>`;
     }).join('') + '</div>';
 }
 
 // ==================== Supabase ====================
-const SUPABASE_URL = 'https://vcbzdslaoumewqhjmojr.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjYnpkc2xhb3VtZXdxaGptb2pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxNjI1OTcsImV4cCI6MjA4NzczODU5N30.WhfPPljwTsm_kUEx02hWF_nU6_oqrKJmF4pqjg8Nhfw';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = supabase.createClient(
+    'https://vcbzdslaoumewqhjmojr.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjYnpkc2xhb3VtZXdxaGptb2pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxNjI1OTcsImV4cCI6MjA4NzczODU5N30.WhfPPljwTsm_kUEx02hWF_nU6_oqrKJmF4pqjg8Nhfw'
+);
 
-const COLORS = ['#e8607c','#f5a0b0','#c06080','#d4789a','#b05070','#e090a0','#a04868','#d06888'];
+const COLORS = ['#e8607c','#5b8def','#f0a030','#27ae60','#9b59b6','#1abc9c','#e67e22','#3498db'];
 let members = [];
-let currentMainTab = 'gifts';
-let wishStatus = 'active';
-let travelStatus = 'pending';
-let restStatus = 'pending';
-let giftFilter = null;
+let wishStatus = 'active', travelStatus = 'pending', restStatus = 'pending', giftFilter = null;
 
-function memberColor(id) { return COLORS[(id - 1) % COLORS.length]; }
-function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function mColor(id) { return COLORS[(id-1)%COLORS.length]; }
+function esc(s) { if(!s)return''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
-// ==================== Main Tabs ====================
+// ==================== Tabs ====================
 function switchMainTab(tab) {
-    currentMainTab = tab;
-    document.querySelectorAll('.main-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab===tab));
     document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-    document.getElementById('tab-' + tab).style.display = 'block';
+    document.getElementById('tab-'+tab).style.display = 'block';
 }
 
 // ==================== Members ====================
 async function loadMembers() {
-    const { data } = await sb.from('members').select('*').order('id');
-    members = data || [];
+    const {data} = await sb.from('members').select('*').order('id');
+    members = data||[];
     const sel = document.getElementById('currentUser');
     const saved = localStorage.getItem('wishlist_user');
-    sel.innerHTML = members.map(m =>
-        `<option value="${m.id}" ${m.id == saved ? 'selected' : ''}>${m.name}</option>`
-    ).join('');
+    sel.innerHTML = members.map(m => `<option value="${m.id}" ${m.id==saved?'selected':''}>${m.name}</option>`).join('');
     if (!saved && members.length) localStorage.setItem('wishlist_user', members[0].id);
     sel.onchange = () => localStorage.setItem('wishlist_user', sel.value);
     renderGiftFilters();
-    renderMemberList();
-}
-
-function renderMemberList() {
     document.getElementById('memberList').innerHTML = members.map(m =>
-        `<span class="member-chip" style="background:${memberColor(m.id)}22;color:${memberColor(m.id)}">${m.name}<span class="delete-member" onclick="deleteMember(${m.id},'${esc(m.name)}')">&times;</span></span>`
+        `<span class="member-chip" style="background:${mColor(m.id)}18;color:${mColor(m.id)}">${m.name}<span class="delete-member" onclick="deleteMember(${m.id},'${esc(m.name)}')">&times;</span></span>`
     ).join('');
-}
-
-async function deleteMember(id, name) {
-    if (!confirm('确定要删除成员 ' + name + ' 吗？\n该成员的所有愿望、旅行和餐厅记录也会被删除。')) return;
-    // Delete related records first
-    await sb.from('wishes').delete().eq('member_id', id);
-    await sb.from('travels').delete().eq('member_id', id);
-    await sb.from('restaurants').delete().eq('member_id', id);
-    // Also clear fulfilled_by references
-    await sb.from('wishes').update({ fulfilled_by: null }).eq('fulfilled_by', id);
-    const { error } = await sb.from('members').delete().eq('id', id);
-    if (error) { alert('删除失败: ' + error.message); return; }
-    await loadMembers();
-    loadWishes(); loadTravels(); loadRestaurants();
 }
 
 async function addMember() {
     const input = document.getElementById('memberName');
     const name = input.value.trim();
     if (!name) return;
-    const { error } = await sb.from('members').insert({ name });
-    if (error) { alert(error.message.includes('duplicate') ? '该成员已存在' : error.message); return; }
+    const {error} = await sb.from('members').insert({name});
+    if (error) { alert(error.message.includes('duplicate')?'该成员已存在':error.message); return; }
     input.value = '';
-    await loadMembers();
-    loadWishes(); loadTravels(); loadRestaurants();
+    await loadMembers(); loadWishes(); loadTravels(); loadRestaurants();
+}
+
+async function deleteMember(id, name) {
+    if (!confirm('确定要删除成员 '+name+' 吗？\n该成员的所有记录也会被删除。')) return;
+    await sb.from('wishes').delete().eq('member_id', id);
+    await sb.from('travels').delete().eq('member_id', id);
+    await sb.from('restaurants').delete().eq('member_id', id);
+    await sb.from('wishes').update({fulfilled_by:null}).eq('fulfilled_by', id);
+    await sb.from('members').delete().eq('id', id);
+    await loadMembers(); loadWishes(); loadTravels(); loadRestaurants();
 }
 
 // ==================== GIFTS ====================
 function renderGiftFilters() {
-    const row = document.getElementById('giftFilterRow');
-    row.innerHTML = `<div class="filter-chip ${giftFilter === null ? 'active' : ''}" onclick="setGiftFilter(null)">全部</div>` +
-        members.map(m => `<div class="filter-chip ${giftFilter === m.id ? 'active' : ''}" onclick="setGiftFilter(${m.id})">${m.name}</div>`).join('');
+    document.getElementById('giftFilterRow').innerHTML =
+        `<div class="filter-chip ${giftFilter===null?'active':''}" onclick="setGiftFilter(null)">全部</div>` +
+        members.map(m => `<div class="filter-chip ${giftFilter===m.id?'active':''}" onclick="setGiftFilter(${m.id})">${m.name}</div>`).join('');
 }
-
-function setGiftFilter(id) { giftFilter = id; renderGiftFilters(); loadWishes(); }
-
+function setGiftFilter(id) { giftFilter=id; renderGiftFilters(); loadWishes(); }
 function switchWishStatus(s) {
-    wishStatus = s;
-    document.querySelectorAll('#tab-gifts .sub-tabs .tab').forEach(t => t.classList.toggle('active', t.dataset.status === s));
+    wishStatus=s;
+    document.querySelectorAll('#tab-gifts .sub-tabs .tab').forEach(t => t.classList.toggle('active', t.dataset.status===s));
     loadWishes();
 }
 
 async function loadWishes() {
-    let query = sb.from('wishes').select('*, member:members!member_id(name), fulfiller:members!fulfilled_by(name)');
-    query = query.eq('fulfilled', wishStatus === 'fulfilled');
-    if (giftFilter) query = query.eq('member_id', giftFilter);
-    query = query.order('created_at', { ascending: false });
-    const { data, error } = await query;
-    const list = document.getElementById('wishList');
-    if (error) { list.innerHTML = `<div class="empty-state">加载失败: ${esc(error.message)}</div>`; return; }
-    if (!data || !data.length) { list.innerHTML = `<div class="empty-state">${wishStatus === 'active' ? '&#10024; 暂无愿望，快来许愿吧 &#10024;' : '还没有已实现的愿望'}</div>`; return; }
+    let q = sb.from('wishes').select('*, member:members!member_id(name), fulfiller:members!fulfilled_by(name)');
+    q = q.eq('fulfilled', wishStatus==='fulfilled');
+    if (giftFilter) q = q.eq('member_id', giftFilter);
+    q = q.order('created_at', {ascending:false});
+    const {data,error} = await q;
+    const el = document.getElementById('wishList');
+    if (error) { el.innerHTML=`<div class="empty-state">加载失败</div>`; return; }
+    if (!data||!data.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">&#127873;</div>${wishStatus==='active'?'暂无心愿，快来许愿吧':'还没有已实现的心愿'}</div>`; return; }
 
-    list.innerHTML = data.map(w => {
-        const color = memberColor(w.member_id);
-        const date = new Date(w.created_at).toLocaleDateString('zh-CN');
-        const memberName = w.member?.name || '';
-        const fulfillerName = w.fulfiller?.name || '';
-        const titleHtml = w.link ? `<a href="${esc(w.link)}" target="_blank" rel="noopener">${esc(w.title)}</a>` : esc(w.title);
-        let actionHtml = wishStatus === 'active'
-            ? `<button class="btn btn-success btn-small" onclick="fulfillWish(${w.id})">&#10084; 实现</button>`
+    el.innerHTML = data.map(w => {
+        const c = mColor(w.member_id), date = new Date(w.created_at).toLocaleDateString('zh-CN');
+        const title = w.link ? `<a href="${esc(w.link)}" target="_blank">${esc(w.title)}</a>` : esc(w.title);
+        const act = wishStatus==='active'
+            ? `<button class="btn btn-primary btn-small" onclick="fulfillWish(${w.id})">&#10084; 实现</button>`
             : `<button class="btn btn-outline btn-small" onclick="unfulfillWish(${w.id})">撤回</button>`;
-        let metaHtml = `<span class="member-tag" style="background:${color}22;color:${color}">${esc(memberName)}</span><span>${date}</span>`;
-        if (wishStatus === 'fulfilled' && fulfillerName) {
-            const fdate = w.fulfilled_at ? new Date(w.fulfilled_at).toLocaleDateString('zh-CN') : '';
-            metaHtml += `<span>由 ${esc(fulfillerName)} 实现 ${fdate}</span>`;
-        }
-        return `<div class="wish-card ${wishStatus === 'fulfilled' ? 'fulfilled' : ''}" style="border-left-color:${color}">
-            <div class="wish-info"><div class="wish-title">${titleHtml}</div><div class="wish-meta">${metaHtml}</div></div>
-            <div class="wish-actions">${actionHtml}</div></div>`;
+        let meta = `<span class="member-tag" style="background:${c}18;color:${c}">${esc(w.member?.name)}</span><span>${date}</span>`;
+        if (wishStatus==='fulfilled' && w.fulfiller?.name) meta += `<span>由 ${esc(w.fulfiller.name)} 实现</span>`;
+        return `<div class="item-card ${wishStatus==='fulfilled'?'done':''}" style="border-left-color:${c}">
+            <div class="card-info"><div class="card-title">${title}</div><div class="card-meta">${meta}</div></div>
+            <div class="card-actions">${act}</div></div>`;
     }).join('');
 }
 
 async function addWish() {
     const title = document.getElementById('wishTitle').value.trim();
     const link = document.getElementById('wishLink').value.trim();
-    const memberId = parseInt(document.getElementById('currentUser').value);
+    const mid = parseInt(document.getElementById('currentUser').value);
     if (!title) return;
-    const { error } = await sb.from('wishes').insert({ title, link: link || null, member_id: memberId });
-    if (error) { alert('添加失败: ' + error.message); return; }
-    document.getElementById('wishTitle').value = '';
-    document.getElementById('wishLink').value = '';
+    await sb.from('wishes').insert({title, link:link||null, member_id:mid});
+    document.getElementById('wishTitle').value=''; document.getElementById('wishLink').value='';
     loadWishes();
 }
-
 async function fulfillWish(id) {
-    const memberId = parseInt(document.getElementById('currentUser').value);
-    await sb.from('wishes').update({ fulfilled: true, fulfilled_at: new Date().toISOString(), fulfilled_by: memberId }).eq('id', id);
+    await sb.from('wishes').update({fulfilled:true, fulfilled_at:new Date().toISOString(), fulfilled_by:parseInt(document.getElementById('currentUser').value)}).eq('id',id);
     loadWishes();
 }
-
 async function unfulfillWish(id) {
-    await sb.from('wishes').update({ fulfilled: false, fulfilled_at: null, fulfilled_by: null }).eq('id', id);
+    await sb.from('wishes').update({fulfilled:false, fulfilled_at:null, fulfilled_by:null}).eq('id',id);
     loadWishes();
 }
 
 // ==================== TRAVEL ====================
 function switchTravelStatus(s) {
-    travelStatus = s;
-    document.querySelectorAll('#tab-travel .sub-tabs .tab').forEach(t => t.classList.toggle('active', t.dataset.status === s));
+    travelStatus=s;
+    document.querySelectorAll('#tab-travel .sub-tabs .tab').forEach(t => t.classList.toggle('active', t.dataset.status===s));
     loadTravels();
 }
 
 async function loadTravels() {
-    let query = sb.from('travels').select('*, member:members!member_id(name)');
-    query = query.eq('fulfilled', travelStatus === 'done');
-    query = query.order('created_at', { ascending: false });
-    const { data, error } = await query;
-    const list = document.getElementById('travelList');
-    if (error) { list.innerHTML = `<div class="empty-state">加载失败: ${esc(error.message)}</div>`; return; }
-    if (!data || !data.length) { list.innerHTML = `<div class="empty-state">${travelStatus === 'pending' ? '&#127758; 还没有想去的地方，快来添加吧' : '还没有去过的旅行'}</div>`; return; }
+    let q = sb.from('travels').select('*, member:members!member_id(name)');
+    q = q.eq('fulfilled', travelStatus==='done').order('created_at',{ascending:false});
+    const {data,error} = await q;
+    const el = document.getElementById('travelList');
+    if (error) { el.innerHTML=`<div class="empty-state">加载失败</div>`; return; }
+    if (!data||!data.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">&#9992;&#65039;</div>${travelStatus==='pending'?'还没有想去的地方，快来添加吧':'还没有去过的旅行'}</div>`; return; }
 
-    list.innerHTML = data.map(t => {
-        const color = memberColor(t.member_id);
-        const date = new Date(t.created_at).toLocaleDateString('zh-CN');
-        const memberName = t.member?.name || '';
-        const titleHtml = t.link ? `<a href="${esc(t.link)}" target="_blank" rel="noopener">${esc(t.destination)}</a>` : esc(t.destination);
-        const noteHtml = t.note ? `<div class="wish-note">${esc(t.note)}</div>` : '';
-        let actionHtml = travelStatus === 'pending'
-            ? `<button class="btn btn-success btn-small" onclick="fulfillTravel(${t.id})">&#9992;&#65039; 去过了</button>`
+    el.innerHTML = data.map(t => {
+        const c = mColor(t.member_id), date = new Date(t.created_at).toLocaleDateString('zh-CN');
+        const title = t.link ? `<a href="${esc(t.link)}" target="_blank">${esc(t.destination)}</a>` : esc(t.destination);
+        const note = t.note ? `<div class="card-note">${esc(t.note)}</div>` : '';
+        const act = travelStatus==='pending'
+            ? `<button class="btn btn-travel btn-small" onclick="fulfillTravel(${t.id})">&#9992;&#65039; 去过了</button>`
             : `<button class="btn btn-outline btn-small" onclick="unfulfillTravel(${t.id})">撤回</button>`;
-        let metaHtml = `<span class="member-tag" style="background:${color}22;color:${color}">${esc(memberName)}</span><span>${date}</span>`;
-        if (travelStatus === 'done' && t.fulfilled_at) {
-            metaHtml += `<span>去过 ${new Date(t.fulfilled_at).toLocaleDateString('zh-CN')}</span>`;
-        }
-        return `<div class="wish-card ${travelStatus === 'done' ? 'fulfilled' : ''}" style="border-left-color:${color}">
-            <div class="wish-info"><div class="wish-title">${titleHtml}</div>${noteHtml}<div class="wish-meta">${metaHtml}</div></div>
-            <div class="wish-actions">${actionHtml}</div></div>`;
+        let meta = `<span class="member-tag" style="background:${c}18;color:${c}">${esc(t.member?.name)}</span><span>${date}</span>`;
+        if (travelStatus==='done' && t.fulfilled_at) meta += `<span>去过 ${new Date(t.fulfilled_at).toLocaleDateString('zh-CN')}</span>`;
+        return `<div class="item-card theme-travel ${travelStatus==='done'?'done':''}" style="border-left-color:${c}">
+            <div class="card-info"><div class="card-title">${title}</div>${note}<div class="card-meta">${meta}</div></div>
+            <div class="card-actions">${act}</div></div>`;
     }).join('');
 }
 
@@ -432,63 +403,43 @@ async function addTravel() {
     const dest = document.getElementById('travelDest').value.trim();
     const link = document.getElementById('travelLink').value.trim();
     const note = document.getElementById('travelNote').value.trim();
-    const memberId = parseInt(document.getElementById('currentUser').value);
+    const mid = parseInt(document.getElementById('currentUser').value);
     if (!dest) return;
-    const { error } = await sb.from('travels').insert({ destination: dest, link: link || null, note: note || null, member_id: memberId });
-    if (error) { alert('添加失败: ' + error.message); return; }
-    document.getElementById('travelDest').value = '';
-    document.getElementById('travelLink').value = '';
-    document.getElementById('travelNote').value = '';
+    await sb.from('travels').insert({destination:dest, link:link||null, note:note||null, member_id:mid});
+    document.getElementById('travelDest').value=''; document.getElementById('travelLink').value=''; document.getElementById('travelNote').value='';
     loadTravels();
 }
-
-async function fulfillTravel(id) {
-    await sb.from('travels').update({ fulfilled: true, fulfilled_at: new Date().toISOString() }).eq('id', id);
-    loadTravels();
-}
-
-async function unfulfillTravel(id) {
-    await sb.from('travels').update({ fulfilled: false, fulfilled_at: null }).eq('id', id);
-    loadTravels();
-}
+async function fulfillTravel(id) { await sb.from('travels').update({fulfilled:true, fulfilled_at:new Date().toISOString()}).eq('id',id); loadTravels(); }
+async function unfulfillTravel(id) { await sb.from('travels').update({fulfilled:false, fulfilled_at:null}).eq('id',id); loadTravels(); }
 
 // ==================== RESTAURANTS ====================
 function switchRestStatus(s) {
-    restStatus = s;
-    document.querySelectorAll('#tab-restaurant .sub-tabs .tab').forEach(t => t.classList.toggle('active', t.dataset.status === s));
+    restStatus=s;
+    document.querySelectorAll('#tab-restaurant .sub-tabs .tab').forEach(t => t.classList.toggle('active', t.dataset.status===s));
     loadRestaurants();
 }
 
 async function loadRestaurants() {
-    let query = sb.from('restaurants').select('*, member:members!member_id(name)');
-    query = query.eq('visited', restStatus === 'visited');
-    query = query.order('created_at', { ascending: false });
-    const { data, error } = await query;
-    const list = document.getElementById('restaurantList');
-    if (error) { list.innerHTML = `<div class="empty-state">加载失败: ${esc(error.message)}</div>`; return; }
-    if (!data || !data.length) { list.innerHTML = `<div class="empty-state">${restStatus === 'pending' ? '&#127860; 还没有想去的餐厅，快来添加吧' : '还没有去过的餐厅'}</div>`; return; }
+    let q = sb.from('restaurants').select('*, member:members!member_id(name)');
+    q = q.eq('visited', restStatus==='visited').order('created_at',{ascending:false});
+    const {data,error} = await q;
+    const el = document.getElementById('restaurantList');
+    if (error) { el.innerHTML=`<div class="empty-state">加载失败</div>`; return; }
+    if (!data||!data.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">&#127860;</div>${restStatus==='pending'?'还没有想去的餐厅，快来添加吧':'还没有去过的餐厅'}</div>`; return; }
 
-    list.innerHTML = data.map(r => {
-        const color = memberColor(r.member_id);
-        const date = new Date(r.created_at).toLocaleDateString('zh-CN');
-        const memberName = r.member?.name || '';
-        const titleHtml = r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">${esc(r.name)}</a>` : esc(r.name);
-        const noteHtml = r.note ? `<div class="wish-note">${esc(r.note)}</div>` : '';
-        let actionHtml, extraMeta = '';
-
-        if (restStatus === 'pending') {
-            actionHtml = `<button class="btn btn-success btn-small" onclick="openVisitModal(${r.id})">&#127860; 去过了</button>`;
-        } else {
-            actionHtml = `<button class="btn btn-outline btn-small" onclick="unvisitRest(${r.id})">撤回</button>`;
-            if (r.visited_at) extraMeta += `<span>去过 ${r.visited_at}</span>`;
-        }
-
-        let metaHtml = `<span class="member-tag" style="background:${color}22;color:${color}">${esc(memberName)}</span><span>${date}</span>${extraMeta}`;
-        const reviewHtml = (restStatus === 'visited' && r.review) ? `<div class="review-box">&#128221; ${esc(r.review)}</div>` : '';
-
-        return `<div class="wish-card ${restStatus === 'visited' ? 'fulfilled' : ''}" style="border-left-color:${color}">
-            <div class="wish-info"><div class="wish-title">${titleHtml}</div>${noteHtml}${reviewHtml}<div class="wish-meta">${metaHtml}</div></div>
-            <div class="wish-actions">${actionHtml}</div></div>`;
+    el.innerHTML = data.map(r => {
+        const c = mColor(r.member_id), date = new Date(r.created_at).toLocaleDateString('zh-CN');
+        const title = r.link ? `<a href="${esc(r.link)}" target="_blank">${esc(r.name)}</a>` : esc(r.name);
+        const note = r.note ? `<div class="card-note">${esc(r.note)}</div>` : '';
+        const review = (restStatus==='visited' && r.review) ? `<div class="review-box">&#128221; ${esc(r.review)}</div>` : '';
+        const act = restStatus==='pending'
+            ? `<button class="btn btn-rest btn-small" onclick="openVisitModal(${r.id})">&#127860; 去过了</button>`
+            : `<button class="btn btn-outline btn-small" onclick="unvisitRest(${r.id})">撤回</button>`;
+        let meta = `<span class="member-tag" style="background:${c}18;color:${c}">${esc(r.member?.name)}</span><span>${date}</span>`;
+        if (restStatus==='visited' && r.visited_at) meta += `<span>去过 ${r.visited_at}</span>`;
+        return `<div class="item-card theme-rest ${restStatus==='visited'?'done':''}" style="border-left-color:${c}">
+            <div class="card-info"><div class="card-title">${title}</div>${note}${review}<div class="card-meta">${meta}</div></div>
+            <div class="card-actions">${act}</div></div>`;
     }).join('');
 }
 
@@ -496,46 +447,40 @@ async function addRestaurant() {
     const name = document.getElementById('restName').value.trim();
     const link = document.getElementById('restLink').value.trim();
     const note = document.getElementById('restNote').value.trim();
-    const memberId = parseInt(document.getElementById('currentUser').value);
+    const mid = parseInt(document.getElementById('currentUser').value);
     if (!name) return;
-    const { error } = await sb.from('restaurants').insert({ name, link: link || null, note: note || null, member_id: memberId });
-    if (error) { alert('添加失败: ' + error.message); return; }
-    document.getElementById('restName').value = '';
-    document.getElementById('restLink').value = '';
-    document.getElementById('restNote').value = '';
+    await sb.from('restaurants').insert({name, link:link||null, note:note||null, member_id:mid});
+    document.getElementById('restName').value=''; document.getElementById('restLink').value=''; document.getElementById('restNote').value='';
     loadRestaurants();
 }
 
 function openVisitModal(id) {
     document.getElementById('visitRestId').value = id;
-    document.getElementById('visitDate').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('visitDate').value = new Date().toISOString().slice(0,10);
     document.getElementById('visitReview').value = '';
     document.getElementById('visitModal').style.display = 'flex';
 }
-
-function closeVisitModal() { document.getElementById('visitModal').style.display = 'none'; }
+function closeVisitModal() { document.getElementById('visitModal').style.display='none'; }
 
 async function submitVisit() {
     const id = parseInt(document.getElementById('visitRestId').value);
-    const visited_at = document.getElementById('visitDate').value || null;
-    const review = document.getElementById('visitReview').value.trim() || null;
-    await sb.from('restaurants').update({ visited: true, visited_at, review }).eq('id', id);
-    closeVisitModal();
-    loadRestaurants();
+    const visited_at = document.getElementById('visitDate').value||null;
+    const review = document.getElementById('visitReview').value.trim()||null;
+    await sb.from('restaurants').update({visited:true, visited_at, review}).eq('id',id);
+    closeVisitModal(); loadRestaurants();
 }
 
 async function unvisitRest(id) {
-    await sb.from('restaurants').update({ visited: false, visited_at: null, review: null }).eq('id', id);
+    await sb.from('restaurants').update({visited:false, visited_at:null, review:null}).eq('id',id);
     loadRestaurants();
 }
 
 // ==================== Enter key ====================
-['wishTitle','wishLink'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') addWish(); }));
-['travelDest','travelLink','travelNote'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') addTravel(); }));
-['restName','restLink','restNote'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') addRestaurant(); }));
-document.getElementById('memberName').addEventListener('keydown', e => { if (e.key === 'Enter') addMember(); });
+['wishTitle','wishLink'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') addWish(); }));
+['travelDest','travelLink','travelNote'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') addTravel(); }));
+['restName','restLink','restNote'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') addRestaurant(); }));
+document.getElementById('memberName').addEventListener('keydown', e => { if(e.key==='Enter') addMember(); });
 
-// Init
 initAuth();
 </script>
 </body>

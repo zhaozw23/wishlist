@@ -7,11 +7,13 @@
     --primary: #e8607c;
     --primary-hover: #d94a68;
     --primary-light: #fce4ec;
-    --success: #e8607c;
     --text: #4a3040;
     --text-light: #a08090;
     --shadow: 0 2px 12px rgba(200,100,120,0.1);
     --gradient: linear-gradient(135deg, #e8607c, #f5a0b0, #e8607c);
+    --gift-color: #e8607c;
+    --travel-color: #5b8def;
+    --rest-color: #f0a030;
 }
 
 body {
@@ -19,6 +21,7 @@ body {
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    padding-bottom: 80px;
 }
 
 header {
@@ -35,11 +38,7 @@ header {
 
 header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
 
-.user-selector {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+.user-selector { display: flex; align-items: center; gap: 8px; }
 
 .user-selector select {
     padding: 6px 12px;
@@ -56,21 +55,19 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
     padding: 20px 16px;
 }
 
-/* Countdown section */
-.countdown-section {
-    margin-bottom: 24px;
-}
+/* ==================== Countdown ==================== */
+.countdown-section { margin-bottom: 24px; }
 
 .countdown-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
 }
 
 .countdown-card {
     background: var(--card-bg);
     border-radius: 16px;
-    padding: 16px 12px;
+    padding: 14px 10px;
     text-align: center;
     box-shadow: var(--shadow);
     border-top: 3px solid var(--primary);
@@ -78,35 +75,116 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
 }
 
 .countdown-card:hover { transform: translateY(-2px); }
-
-.countdown-card .emoji { font-size: 1.6rem; margin-bottom: 6px; }
-.countdown-card .label { font-size: 0.8rem; color: var(--text-light); margin-bottom: 4px; }
-.countdown-card .days { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
-.countdown-card .days-label { font-size: 0.75rem; color: var(--text-light); }
-.countdown-card .date-info { font-size: 0.7rem; color: var(--text-light); margin-top: 4px; }
+.countdown-card .emoji { font-size: 1.5rem; margin-bottom: 4px; }
+.countdown-card .label { font-size: 0.75rem; color: var(--text-light); margin-bottom: 2px; }
+.countdown-card .days { font-size: 1.6rem; font-weight: 700; color: var(--primary); }
+.countdown-card .days-label { font-size: 0.7rem; color: var(--text-light); }
+.countdown-card .date-info { font-size: 0.65rem; color: var(--text-light); margin-top: 2px; }
 
 .countdown-card.together {
     background: var(--gradient);
     color: #fff;
     border-top: none;
 }
-.countdown-card.together .label { color: rgba(255,255,255,0.8); }
-.countdown-card.together .days { color: #fff; }
-.countdown-card.together .days-label { color: rgba(255,255,255,0.8); }
+.countdown-card.together .label,
+.countdown-card.together .days-label,
 .countdown-card.together .date-info { color: rgba(255,255,255,0.8); }
+.countdown-card.together .days { color: #fff; }
 
-/* Add wish form */
+/* ==================== Bottom Tab Bar ==================== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    display: flex;
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+    z-index: 100;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 4px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    gap: 4px;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.nav-item .nav-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    transition: transform 0.2s;
+}
+
+.nav-item .nav-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-light);
+    transition: color 0.2s;
+}
+
+.nav-item.active .nav-icon { transform: scale(1.15); }
+
+.nav-item[data-tab="gifts"].active .nav-label { color: var(--gift-color); }
+.nav-item[data-tab="travel"].active .nav-label { color: var(--travel-color); }
+.nav-item[data-tab="restaurant"].active .nav-label { color: var(--rest-color); }
+
+.nav-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 40px;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    transition: transform 0.25s;
+}
+
+.nav-item[data-tab="gifts"]::before { background: var(--gift-color); }
+.nav-item[data-tab="travel"]::before { background: var(--travel-color); }
+.nav-item[data-tab="restaurant"]::before { background: var(--rest-color); }
+
+.nav-item.active::before { transform: translateX(-50%) scaleX(1); }
+
+/* ==================== Tab Content Headers ==================== */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.section-header .section-icon { font-size: 1.8rem; }
+
+.section-header .section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.section-header[data-theme="gifts"] .section-title { color: var(--gift-color); }
+.section-header[data-theme="travel"] .section-title { color: var(--travel-color); }
+.section-header[data-theme="restaurant"] .section-title { color: var(--rest-color); }
+
+/* ==================== Forms ==================== */
 .add-form {
     background: var(--card-bg);
     border-radius: 16px;
-    padding: 20px;
+    padding: 18px;
     box-shadow: var(--shadow);
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     border: 1px solid var(--border);
 }
 
 .add-form h2 {
-    font-size: 1.1rem;
+    font-size: 1rem;
     margin-bottom: 12px;
     color: var(--primary);
 }
@@ -119,26 +197,27 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
 
 .form-row:last-child { margin-bottom: 0; }
 
-.form-row input {
+.form-row input, .form-row textarea {
     flex: 1;
     padding: 10px 14px;
     border: 1px solid var(--border);
-    border-radius: 20px;
+    border-radius: 12px;
     font-size: 0.95rem;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
     background: #fffafa;
+    font-family: inherit;
 }
 
-.form-row input:focus {
+.form-row input:focus, .form-row textarea:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(232,96,124,0.15);
+    box-shadow: 0 0 0 3px rgba(232,96,124,0.12);
 }
 
 .btn {
     padding: 10px 20px;
     border: none;
-    border-radius: 20px;
+    border-radius: 12px;
     font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.2s;
@@ -154,6 +233,27 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(232,96,124,0.4);
 }
+
+.btn-travel {
+    background: linear-gradient(135deg, #5b8def, #7ea8f8);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(91,141,239,0.3);
+}
+.btn-travel:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(91,141,239,0.4);
+}
+
+.btn-rest {
+    background: linear-gradient(135deg, #f0a030, #f5c060);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(240,160,48,0.3);
+}
+.btn-rest:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(240,160,48,0.4);
+}
+
 .btn-success {
     background: var(--gradient);
     color: #fff;
@@ -163,15 +263,50 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(232,96,124,0.4);
 }
+
 .btn-outline {
     background: transparent;
     border: 1px solid var(--border);
     color: var(--text);
 }
 .btn-outline:hover { background: var(--primary-light); }
+
 .btn-small { padding: 6px 14px; font-size: 0.85rem; }
 
-/* Filter */
+/* ==================== Sub Tabs ==================== */
+.sub-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.sub-tabs .tab {
+    padding: 7px 18px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.sub-tabs .tab.active {
+    color: #fff;
+    border-color: transparent;
+}
+
+/* Theme-aware sub tabs */
+[data-theme="gifts"] .sub-tabs .tab.active {
+    background: var(--gift-color);
+}
+[data-theme="travel"] .sub-tabs .tab.active {
+    background: var(--travel-color);
+}
+[data-theme="restaurant"] .sub-tabs .tab.active {
+    background: var(--rest-color);
+}
+
+/* ==================== Filter ==================== */
 .filter-row {
     display: flex;
     gap: 6px;
@@ -195,57 +330,75 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
     border-color: var(--primary);
 }
 
-/* Wish cards */
-.wish-card {
+/* ==================== Cards ==================== */
+.item-card {
     background: var(--card-bg);
     border-radius: 16px;
-    padding: 16px 20px;
+    padding: 16px 18px;
     box-shadow: var(--shadow);
     margin-bottom: 12px;
-    border-left: 4px solid var(--primary);
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 12px;
     transition: transform 0.2s;
     border: 1px solid var(--border);
-    border-left: 4px solid var(--primary);
+    border-left: 4px solid var(--gift-color);
 }
 
-.wish-card:hover { transform: translateY(-1px); }
+.item-card:hover { transform: translateY(-1px); }
 
-.wish-card.fulfilled {
-    opacity: 0.65;
-    border-left-color: #c0a0a8;
+.item-card.theme-travel { border-left-color: var(--travel-color); }
+.item-card.theme-rest { border-left-color: var(--rest-color); }
+
+.item-card.done {
+    opacity: 0.6;
+    border-left-color: #ccc;
 }
 
-.wish-info { flex: 1; min-width: 0; }
+.card-info { flex: 1; min-width: 0; }
 
-.wish-title {
+.card-title {
     font-size: 1.05rem;
     font-weight: 500;
     margin-bottom: 4px;
     word-break: break-word;
 }
 
-.wish-title a {
-    color: var(--primary);
-    text-decoration: none;
+.card-title a { color: var(--primary); text-decoration: none; }
+.card-title a:hover { text-decoration: underline; }
+
+.card-note {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin: 4px 0;
+    font-style: italic;
 }
 
-.wish-title a:hover { text-decoration: underline; }
-
-.wish-meta {
+.card-meta {
     font-size: 0.8rem;
     color: var(--text-light);
     display: flex;
     flex-wrap: wrap;
     gap: 4px 12px;
+    align-items: center;
 }
 
-.wish-actions { flex-shrink: 0; }
+.card-actions { flex-shrink: 0; }
 
-/* Member colors */
+/* Reviews */
+.review-box {
+    font-size: 0.85rem;
+    background: linear-gradient(135deg, #fffaf0, #fff8ee);
+    border: 1px solid #f0e0c0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 8px 0 6px;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+/* ==================== Member Tag ==================== */
 .member-tag {
     display: inline-block;
     padding: 1px 8px;
@@ -254,7 +407,7 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
     font-weight: 500;
 }
 
-/* Add member section */
+/* ==================== Member Section ==================== */
 .member-section {
     margin-top: 32px;
     background: var(--card-bg);
@@ -277,14 +430,37 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
     margin-bottom: 12px;
 }
 
+.member-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.member-chip .delete-member {
+    cursor: pointer;
+    font-size: 0.8rem;
+    opacity: 0.4;
+    margin-left: 2px;
+    transition: opacity 0.2s;
+}
+
+.member-chip .delete-member:hover { opacity: 1; }
+
+/* ==================== Empty State ==================== */
 .empty-state {
     text-align: center;
-    padding: 40px 20px;
+    padding: 50px 20px;
     color: var(--text-light);
     font-size: 0.95rem;
 }
 
-/* Login screen */
+.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.5; }
+
+/* ==================== Login ==================== */
 #loginScreen {
     display: flex;
     align-items: center;
@@ -315,10 +491,9 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
 }
 
 .login-box p { color: var(--text-light); margin-bottom: 24px; }
-
 .login-box .form-row { justify-content: center; }
 
-/* Floating hearts background */
+/* ==================== Hearts Background ==================== */
 .hearts-bg {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -341,82 +516,7 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
     100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
 }
 
-/* Main tabs */
-.main-tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 20px;
-    background: var(--card-bg);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-}
-
-.main-tab {
-    flex: 1;
-    padding: 14px 8px;
-    text-align: center;
-    cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    border-right: 1px solid var(--border);
-}
-
-.main-tab:last-child { border-right: none; }
-
-.main-tab.active {
-    background: var(--gradient);
-    color: #fff;
-}
-
-.main-tab:not(.active):hover { background: var(--primary-light); }
-
-/* Sub tabs */
-.sub-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-}
-
-.sub-tabs .tab {
-    padding: 8px 20px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    background: var(--card-bg);
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s;
-}
-
-.sub-tabs .tab.active {
-    background: var(--gradient);
-    color: #fff;
-    border-color: var(--primary);
-    box-shadow: 0 2px 8px rgba(232,96,124,0.3);
-}
-
-/* Notes and reviews */
-.wish-note {
-    font-size: 0.85rem;
-    color: var(--text-light);
-    margin: 4px 0;
-    font-style: italic;
-}
-
-.review-box {
-    font-size: 0.85rem;
-    background: #fff8f8;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 12px;
-    margin: 8px 0 4px;
-    color: var(--text);
-    line-height: 1.5;
-}
-
-/* Modal */
+/* ==================== Modal ==================== */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -425,6 +525,7 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    backdrop-filter: blur(2px);
 }
 
 .modal-box {
@@ -434,11 +535,17 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
     width: 90%;
     max-width: 400px;
     box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+    animation: modalIn 0.2s ease-out;
+}
+
+@keyframes modalIn {
+    from { transform: scale(0.95) translateY(10px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 .modal-box h2 {
     font-size: 1.1rem;
-    color: var(--primary);
+    color: var(--rest-color);
     margin-bottom: 16px;
 }
 
@@ -472,40 +579,21 @@ header h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: 1px; }
 }
 
 .modal-box input:focus, .modal-box textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(232,96,124,0.15);
+    border-color: var(--rest-color);
+    box-shadow: 0 0 0 3px rgba(240,160,48,0.15);
 }
 
 .modal-box .form-row { margin-bottom: 12px; }
 
-/* Member delete button */
-.member-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 500;
-}
-
-.member-chip .delete-member {
-    cursor: pointer;
-    font-size: 0.75rem;
-    opacity: 0.5;
-    margin-left: 2px;
-    transition: opacity 0.2s;
-}
-
-.member-chip .delete-member:hover { opacity: 1; }
-
-/* Responsive */
+/* ==================== Responsive ==================== */
 @media (max-width: 500px) {
     header { padding: 12px 16px; }
     header h1 { font-size: 1.2rem; }
     .form-row { flex-direction: column; }
     .btn { width: 100%; text-align: center; }
-    .wish-card { flex-direction: column; }
-    .wish-actions { align-self: flex-end; }
+    .item-card { flex-direction: column; }
+    .card-actions { align-self: flex-end; }
     .countdown-grid { grid-template-columns: repeat(2, 1fr); }
+    .nav-item .nav-icon { font-size: 1.3rem; }
+    .nav-item .nav-label { font-size: 0.65rem; }
 }
