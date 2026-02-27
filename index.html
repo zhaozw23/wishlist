@@ -415,7 +415,7 @@ async function loadWishes() {
     el.innerHTML = data.map(w => {
         const c = mColor(w.member_id), date = new Date(w.created_at).toLocaleDateString('zh-CN');
         const title = w.link ? `<a href="${esc(w.link)}" target="_blank">${esc(w.title)}</a>` : esc(w.title);
-        const del = `<button class="btn-delete" onclick="deleteItem('wishes',${w.id})" title="删除">&#128465;</button>`;
+        const del = `<button class="btn-delete" onclick="deleteItem('wishes',${w.id})" title="删除">&times;</button>`;
         const act = wishStatus==='active'
             ? `<button class="btn btn-primary btn-small" onclick="fulfillWish(${w.id})">&#10084; 实现</button>${del}`
             : `<button class="btn btn-outline btn-small" onclick="unfulfillWish(${w.id})">撤回</button>${del}`;
@@ -468,7 +468,7 @@ async function loadTravels() {
         const coordLink = (t.lat!=null && t.lng!=null)
             ? `<span class="coord-link" onclick="flyTo(${t.lat},${t.lng})">&#128205; ${t.lat.toFixed(2)}, ${t.lng.toFixed(2)}</span>` : '';
         const reviewHtml = (travelStatus==='done' && t.review) ? `<div class="review-box">&#128221; ${esc(t.review)}</div>` : '';
-        const del = `<button class="btn-delete" onclick="deleteItem('travels',${t.id})" title="删除">&#128465;</button>`;
+        const del = `<button class="btn-delete" onclick="deleteItem('travels',${t.id})" title="删除">&times;</button>`;
         const act = travelStatus==='pending'
             ? `<button class="btn btn-travel btn-small" onclick="openDoneModal(${t.id},'travel')">&#9992;&#65039; 去过了</button>${del}`
             : `<button class="btn btn-outline btn-small" onclick="unfulfillTravel(${t.id})">撤回</button>${del}`;
@@ -521,7 +521,7 @@ async function loadRestaurants() {
         const title = r.link ? `<a href="${esc(r.link)}" target="_blank">${esc(r.name)}</a>` : esc(r.name);
         const note = r.note ? `<div class="card-note">${esc(r.note)}</div>` : '';
         const review = (restStatus==='visited' && r.review) ? `<div class="review-box">&#128221; ${esc(r.review)}</div>` : '';
-        const del = `<button class="btn-delete" onclick="deleteItem('restaurants',${r.id})" title="删除">&#128465;</button>`;
+        const del = `<button class="btn-delete" onclick="deleteItem('restaurants',${r.id})" title="删除">&times;</button>`;
         const act = restStatus==='pending'
             ? `<button class="btn btn-rest btn-small" onclick="openDoneModal(${r.id},'restaurant')">&#127860; 去过了</button>${del}`
             : `<button class="btn btn-outline btn-small" onclick="unvisitRest(${r.id})">撤回</button>${del}`;
