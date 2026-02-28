@@ -520,7 +520,10 @@ async function loadTravels() {
     const {data:allData} = await sb.from('travels').select('*, member:members!member_id(name)').order('created_at',{ascending:false});
     refreshMapMarkers(allData || []);
 
-    const data = (allData||[]).filter(t => t.fulfilled === (travelStatus==='done'));
+    let data = (allData||[]).filter(t => t.fulfilled === (travelStatus==='done'));
+    if (travelStatus==='done') {
+        data.sort((a, b) => new Date(a.fulfilled_at||0) - new Date(b.fulfilled_at||0));
+    }
     const el = document.getElementById('travelList');
     if (!data.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">&#9992;&#65039;</div>${travelStatus==='pending'?'还没有想去的地方，快来添加吧':'还没有去过的旅行'}</div>`; return; }
 
@@ -575,6 +578,9 @@ async function loadRestaurants() {
     let q = sb.from('restaurants').select('*, member:members!member_id(name)');
     q = q.eq('visited', restStatus==='visited').order('created_at',{ascending:false});
     const {data,error} = await q;
+    if (restStatus==='visited' && data) {
+        data.sort((a, b) => new Date(a.visited_at||0) - new Date(b.visited_at||0));
+    }
     const el = document.getElementById('restaurantList');
     if (error) { el.innerHTML=`<div class="empty-state">加载失败</div>`; return; }
     if (!data||!data.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">&#127860;</div>${restStatus==='pending'?'还没有想去的餐厅，快来添加吧':'还没有去过的餐厅'}</div>`; return; }
